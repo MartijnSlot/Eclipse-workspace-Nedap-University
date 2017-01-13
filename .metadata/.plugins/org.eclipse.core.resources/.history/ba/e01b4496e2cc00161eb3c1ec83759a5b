@@ -1,0 +1,31 @@
+package week6.voteMachine;
+
+public class VoteMachine {
+	
+	private PartyList parties;
+	private VoteList votes;
+	private VoteTUIView ui;
+	
+	public VoteMachine() {
+		this.votes = new VoteList();
+		this.parties = new PartyList();
+		this.ui = new VoteTUIView();
+	}
+	
+	public static void main(String[] args){
+		new VoteMachine().start();
+	}
+	
+	public void start() {
+		ui.start();
+	}
+	
+	public void addParty(String party){
+		parties.addParty(party);
+	}
+	
+	public void Vote(String party){
+		votes.addVote(party);
+	}
+
+}

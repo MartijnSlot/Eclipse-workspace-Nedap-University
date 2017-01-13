@@ -1,0 +1,42 @@
+package week3.hotel;
+
+import java.io.PrintStream;
+import week3.Format;
+
+public class Bill {
+	
+	private double sum;
+	private PrintStream out;
+	private double amount;
+	private String text;
+
+	public Bill(String text, double amount) {
+		this.text = text;
+		this.amount = amount;
+	}
+	
+	public void newItem(Bill.Item item){
+		Format.printLine(this.text.toString(), Item.getAmount());
+		sum += Item.getAmount();
+	}
+
+	public void finish() {
+		Format.printLine("Total amount: ", getSum());
+		
+	}
+	
+	public String toString(){
+		return text;
+	}
+	
+	public double getSum() {
+		return sum;
+	}
+	
+	public interface Item {
+		static double getAmount() {
+			return 0;
+		}
+	}
+
+}

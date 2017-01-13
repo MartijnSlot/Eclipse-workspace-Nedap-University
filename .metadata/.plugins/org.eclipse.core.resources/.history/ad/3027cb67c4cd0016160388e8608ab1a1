@@ -1,0 +1,20 @@
+package week7.threads;
+
+public class TestConsole extends Thread {
+	
+	private String name;
+
+	public TestConsole(String name){
+		this.name = name;
+	}
+	
+	public void run(){
+		sum();
+	}
+	
+	private void sum(){
+		int int1 = Console.readInt(name + ": int1:");
+		int int2 = Console.readInt(name + ": int1:");
+		Console.println(name + ": the sum of " + int1 + "and " + int2 + "is " + (int1 + int2));
+	}
+}

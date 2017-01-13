@@ -1,0 +1,33 @@
+package week4;
+
+import java.util.Arrays;
+
+public class RecExer {
+
+	private static int[] blabla = {1,2,3,4,5};
+
+	public RecExer(){
+
+	}
+
+	public void addToArray(int[] snikkel){
+		for (int i = 0; i < snikkel.length; i++) {
+			int temp;
+			temp = snikkel[i + 1];
+			if (i == snikkel.length - 1){
+				snikkel[0] = snikkel[snikkel.length - 1];
+			} else {
+				snikkel[i + 1] = snikkel[i];
+				snikkel[i] = temp;
+			}
+		}
+	}
+
+	public static void main(String[] args){
+		RecExer snikkel = new RecExer();
+		System.out.print(Arrays.toString(blabla));
+		snikkel.addToArray(blabla);
+		System.out.print("\n" + Arrays.toString(blabla));
+
+	}
+}

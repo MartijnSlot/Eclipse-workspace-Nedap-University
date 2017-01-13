@@ -1,0 +1,50 @@
+package ss.week2.hotel;
+
+public class Hotel {
+	
+	//---vars
+	public static String password;
+	public static Guest guest;
+
+	
+	//---constructor
+	public Hotel(){
+		this.guest = null;
+		this.password = null;
+	}
+	
+	//---queries
+	
+	//@ ensures /result = true || /result = false;
+	/*@ pure */ public Room getFreeRoom(){
+		return;
+	}
+	
+	//@ ensures /result = true || /result = false;
+	/*@ pure */ public Room getRoom(){
+		return;
+		
+	}
+	
+	//@ ensures /result = password;
+	/*@ pure */ public String getPassword(){
+		return this.password;
+	}
+	
+	public String toString(){
+		return "";
+	}
+	
+	//---commands
+	
+	//@ requires password.length() >= 6 && !password.contains(" ");
+	public void checkIn(String password, Guest guestName){
+		this.guest = guestName;
+		this.password = password;
+	}
+	
+	//@ requires password.length() >= 6 && !password.contains(" ");
+	public void checkout(String guestName){
+		
+	}
+}

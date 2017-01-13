@@ -1,0 +1,29 @@
+package ss.week1;
+
+public class Lamp {
+	
+	public static final int LOW = 1;
+	public static final int MED = 2;
+	public static final int HIGH = 3;
+	
+	private int light;
+	
+	public Lamp() {
+		this.light = LOW;
+		
+	}
+	
+	public int light () {
+		return light;
+	}
+	
+	public void switchlight(){
+		light = (light + 1);
+	}
+	
+	public static void main (String[] args) {
+		Lamp lamp1 = new Lamp();
+		System.out.println(lamp1.switchlight());
+		
+	}
+}

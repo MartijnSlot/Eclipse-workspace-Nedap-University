@@ -1,0 +1,6 @@
+package week7.threads;
+
+public class TestConsole extends Thread {
+	
+	
+}

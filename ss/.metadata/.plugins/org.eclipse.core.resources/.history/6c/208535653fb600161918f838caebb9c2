@@ -1,0 +1,107 @@
+package week2.hotel;
+
+public class Hotel {
+
+	// ---vars
+	public Guest guest;
+	public Room room101;
+	public Room room102;
+	public String guestName;
+	public String hotelName;
+	private Password password;
+	
+
+	// ---constructor
+	public Hotel(String name) {
+		this.hotelName = name;
+		this.room101 = new Room(101);
+		this.room102 = new Room(102);
+		this.password = new Password();
+		
+	}
+	
+	// ---queries
+	
+	// @ ensures /result = room && room.getGuest() = null;
+	/* @ pure */ public Room getFreeRoom() {
+		Room output = null;
+		if (this.room101.getGuest() == null){
+			output = this.room101;
+			}
+		else if (this.room102.getGuest() == null){
+			output = this.room102;
+			}
+		
+		return output;
+	}
+	
+	
+	// @ requires guestName != "" && guestName != null;
+	// @ ensures /result = room;
+	/* @ pure */ public Room getRoom(String guestName) {
+		Room output = null;
+		if (this.room101.getGuest() != null && this.room102.getGuest() != null){
+			if (this.room101.getGuest().getName().equals(guestName) ||
+					this.room102.getGuest().getName().equals(guestName)){
+				this.guest = new Guest(guestName);
+				output = this.guest.getRoom();
+				}
+		}
+		return output;
+	}
+
+	// @ ensures /result = password;
+	/* @ pure */ public Password getPassword() {
+		return this.password;
+	}
+
+	 public String toString() { 
+		  String output = ""; 
+		   output += this.guest + "\n"; 
+		   if (this.guest.getRoom() == null) { 
+		    output += "Guest without room " + this.guest.getName() + "\n";
+		    } 
+		  return output; 
+		  } 
+
+//	 ---commands
+
+	 /**
+	  *@ requires pwAttempt != null && pwAttempt != "" 
+	  *@ requires guestName != null && guestName != "" 
+	  * @param password 
+	  * @param guestname 
+	  * @return 
+	  */ 
+	public Room checkIn(String pwAttempt, String guestName) {
+		Room freeRoom = this.getFreeRoom();
+		if (!getPassword().testWord(pwAttempt) || freeRoom == null) {
+			return null;
+		}
+		
+		this.guest = new Guest(guestName);
+		this.guest.checkin(freeRoom);
+		freeRoom.setGuest(this.guest);
+		return freeRoom;
+	}
+
+
+	// @ requires password.length() >= 6 && !password.contains(" ");
+	public void checkOut(String guestName) {
+		if (room101.getGuest() != null){
+			if (this.room101.getGuest().getName().equals(guestName)) {
+				this.room101.setGuest(null); 
+				this.room101.getSafe().deactivate(); 
+				this.room101.getSafe().close();
+				} 
+			}
+		if (room102.getGuest() != null){
+			if (this.room102.getGuest().getName().equals(guestName)) { 
+				this.room102.setGuest(null); 
+				this.room102.getSafe().deactivate(); 
+				this.room102.getSafe().close();  
+		   } 
+		}
+	}
+
+}

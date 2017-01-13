@@ -1,0 +1,54 @@
+package week6.voteMachine;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+public class VoteTUIView {
+
+	public VoteMachine vm;
+
+	public VoteTUIView(){
+		this.vm = new VoteMachine();
+	}
+
+	public void start(){
+		String input = null;
+		Scanner in = new Scanner(System.in);
+
+		System.out.println("Type one:");
+		System.out.println("VOTE [party], ADD PARTY [party], VOTES, PARTIES, EXIT or HELP");
+		input = in.hasNextLine() ? in.nextLine() : null;
+
+		if (input.equals("VOTE")) {
+
+		} else if (input.equals("ADD PARTY")) {
+
+		} else if (input.equals("VOTES")) {
+
+		} else if (input.equals("PARTIES")) {
+
+		} else if (input.equals("EXIT")) {
+
+		} else if (input.equals("HELP")) {
+
+		}
+	}
+
+	public void showVotes(Map<String, Integer> map){
+		for (String ki : map.keySet()){
+			System.out.println(ki + map.get(ki));
+		}
+	}
+	
+	public void showParties(List<String> list){
+		for (String party : list){
+			System.out.println(party);
+		}
+	}
+	
+	public void showError(String error){
+		System.out.println(error);
+	}
+
+}

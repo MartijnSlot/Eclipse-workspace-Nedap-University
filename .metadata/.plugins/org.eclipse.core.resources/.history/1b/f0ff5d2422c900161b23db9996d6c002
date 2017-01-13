@@ -1,0 +1,22 @@
+package week6.voteMachine;
+
+import java.util.Map;
+
+public class PartyList {
+
+	public void addParty(String party1) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public boolean hasParty(String party1) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public Map getParties() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

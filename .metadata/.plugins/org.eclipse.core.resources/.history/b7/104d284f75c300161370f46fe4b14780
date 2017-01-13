@@ -1,0 +1,32 @@
+package week5;
+
+import week4.tictactoe.Board;
+import week4.tictactoe.Mark;
+import week4.tictactoe.Player;
+
+public class ComputerPlayer extends Player {
+
+	private Strategy strategy;
+	private Mark mark;
+
+	public ComputerPlayer(Mark mark, Strategy strategy) {
+		super("Computer", mark);
+		this.strategy = strategy;
+		this.mark = mark;
+	}
+	
+	public ComputerPlayer(Mark mark) {
+		super("Computer", mark);
+		this.strategy = new NaiveStrategy();
+		this.mark = mark;
+	}
+
+	public int determineMove(Board board) {
+		return strategy.determineMove(board, this.mark);
+	}
+	
+	public String getName(){
+		return strategy.toString() + "-" + mark.toString();
+	}
+
+}

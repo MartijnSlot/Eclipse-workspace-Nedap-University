@@ -1,0 +1,28 @@
+package week6.voteMachine;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+public class PartyList {
+	
+	public List<String> parties;
+	
+	public PartyList(){
+		parties = new ArrayList<String>();	
+	}
+
+	public void addParty(String party1) {
+		parties.add(party1);
+	}
+
+	public boolean hasParty(String party1) {
+		return (parties.contains(party1));
+	}
+
+	public List<String> getParties() {
+		return parties;
+	}
+
+}

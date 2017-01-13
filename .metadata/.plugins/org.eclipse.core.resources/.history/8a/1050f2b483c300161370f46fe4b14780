@@ -1,0 +1,46 @@
+package week5;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+public class SmartStrategy implements Strategy {
+
+	@Override
+	public String getName() {
+		return "Smart";
+	}
+
+	@Override
+	public int determineMove(Board b, Mark m) {
+		List[] markList = new ArrayList[b.DIM -1];
+		int middleField = ((int) Math.pow(b.DIM, 2) / 2);
+		if(b.isEmptyField(middleField)) {
+			return (middleField);
+		}
+		
+		Board copy = b.deepCopy();
+		
+		Set<Integer> emptyFields = new HashSet<>();
+		int randomEmptyField = (int) (Math.random() * emptyFields.size());
+	    int counter = 0;
+		
+		for (int i = 0; i < Math.pow(copy.DIM, 2); i++){
+			if (copy.isEmptyField(i)) {
+				emptyFields.add(i);
+			}
+		}
+		
+	    Iterator<Integer> iterator = emptyFields.iterator();
+	    Integer selectField = iterator.next();
+	    while(counter < iterator.next()) {
+	        selectField = iterator.next();
+	        counter ++;
+	    }
+		return selectField.intValue();
+		
+		return 0;
+	}
+}

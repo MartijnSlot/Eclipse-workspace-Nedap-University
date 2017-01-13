@@ -1,0 +1,24 @@
+package week2.hotel;
+
+import
+
+public class TimedPassword extends Password{
+	
+	private long validTime;
+	
+	public TimedPassword(long expirationTime){
+		this.validTime = System.currentTimeMillis() + expirationTime;
+	}
+	
+
+	public TimedPassword(){
+		
+	}
+	
+	
+	
+	public boolean isExpired(){
+		return false;
+	}
+
+}

@@ -1,0 +1,23 @@
+package week6.voteMachine;
+
+import java.util.Scanner;
+
+public class VoteTUIView {
+
+	public VoteMachine vm;
+
+	public VoteTUIView(){
+		this.vm = new VoteMachine();
+	}
+
+	public void start(){
+		String input = null;
+		Scanner in = new Scanner(System.in);
+		
+		System.out.println("Type one:");
+		System.out.println("VOTE [party], ADD PARTY [party], VOTES, PARTIES, EXIT or HELP");
+		
+
+	}
+
+}

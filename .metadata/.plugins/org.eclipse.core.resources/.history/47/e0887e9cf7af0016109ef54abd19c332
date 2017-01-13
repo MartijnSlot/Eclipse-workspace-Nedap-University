@@ -1,0 +1,51 @@
+package ss.week1;
+
+public class Password {
+	
+	public static final String INITIAL = "Snikkel3";
+	public String PW = "Snikkel3";
+	
+	//constructor
+	public Password() {
+	}
+	
+	//methods - queries
+	
+	/**
+	 * Test if a given string is an acceptable password. 
+	 * Not acceptable: A word with less than 6 characters 
+	 * or a word that contains a space.
+	 * true If suggestion is acceptable
+	 * @param suggestion
+	 * @return boolean
+	 */
+	public boolean acceptable(String suggestion) {
+		return (suggestion.length() >= 6 && !suggestion.contains(" "));
+	}
+	
+	/**
+	 * Test if the given word is equal to the current password
+	 * true If test is equal to the current password
+	 * @param test
+	 * @return boolean
+	 */
+	public boolean testWord(String test) {
+		return test.equals(PW);
+	}
+	
+	/**
+	 * Changes the password; true if old is equal to the current 
+	 * password and that newpass is an acceptable password
+	 * @param oldpass, newpass
+	 * @return boolean
+	 */
+	public boolean setWord(String oldpass, String newpass){
+		if (oldpass.equals(INITIAL) && (newpass.length() >= 6 && !newpass.contains(" "))){
+			this.PW = newpass;
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
+
