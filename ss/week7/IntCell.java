@@ -19,6 +19,7 @@ public class IntCell {
         try {
             a1.join();
             a2.join();
+            Thread.sleep(10);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -34,7 +35,7 @@ class Adder extends Thread {
         this.cell = cellArg;
         this.amount = amountArg;
     }
-    public void run() {
+    public synchronized void run() {
         cell.add(amount);
     }
 }
