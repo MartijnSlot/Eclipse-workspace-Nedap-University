@@ -26,10 +26,10 @@ public enum Stone {
     
     public String toString(){
     	if (this == BLACK) {
-    		return "X";
+    		return "B";
     	} else if (this == WHITE) {
-    		return "O";
+    		return "W";
     	}
-    	return " ";
+    	return ".";
     }
 }

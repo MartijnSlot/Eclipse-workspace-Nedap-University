@@ -6,6 +6,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * TODO make TGUI for all dims. Coordinate error occurs with double digits.
+ */
+
+/**
  * Represents a board in a Go game.
  *
  * @author Martijn Slot
@@ -14,7 +18,8 @@ import java.util.Set;
 public class Board {
 
 	int dim;
-	private Map<Position, Point> points;
+	private Map<Position, Point> points = new HashMap<>();
+	private Set<Board> history = new HashSet<>();
 
 	/**
 	 * constructor of board of size dim * dim, containing only EMPTY fields.
@@ -31,13 +36,14 @@ public class Board {
 	}
 
 	/**
-	 * Returns a deep copy of this board.
+	 * Returns a deep copy of this board and puts it is a set of board called history.
 	 * @return board
 	 */
-	public Board deepCopy() {
+	public Set<Board> writeToHistory() {
 		Board copy = new Board(this.dim);
 		copy.points = new HashMap<Position, Point>(this.points);
-		return copy;
+		history.add(copy);
+		return history;
 	}
 
 	/**
@@ -85,9 +91,9 @@ public class Board {
 	 */
 	public Set<Position> freePositions(Position pos) {
 		Set<Position> freePositions = new HashSet<Position>();
-		
+
 		assert(this.isPoint(pos));
-		
+
 		for (int i = pos.x - 1; i <= pos.x + 1; pos.x++) {
 			if (getPoint(new Position(i, pos.y)).getStone() == Stone.EMPTY) {
 				freePositions.add(new Position(i,pos.y));
@@ -121,7 +127,7 @@ public class Board {
 		Set<Position> attackPositions = new HashSet<Position>();
 
 		assert(this.isPoint(pos));
-		
+
 		for (int i = pos.x - 1; i <= pos.x + 1; pos.x++) {
 			if (getPoint(new Position(i, pos.y)).getStone() == attack) {
 				attackPositions.add(new Position(i, pos.y));
@@ -141,7 +147,7 @@ public class Board {
 	 * @return boolean
 	 */
 	public boolean hasAttackers(Position pos) {
-		return attackPositions(pos) != null;
+		return attackPositions(pos).size() != 0;
 	}
 
 	/**
@@ -149,12 +155,12 @@ public class Board {
 	 * @param position
 	 * @return set
 	 */
-	public Set<Position> defendPositions(Position pos) {
+	public Set<Position> defendingCluster(Position pos) {
 		Stone defend = getPoint(pos).getStone().other();
 		Set<Position> defendPositions = new HashSet<Position>();
 		defendPositions.add(pos);
 		int temp = 0;
-		
+
 		while (defendPositions.size() != temp) {
 			temp = defendPositions.size();
 			for(Position p : defendPositions) {
@@ -180,7 +186,7 @@ public class Board {
 	 * @return boolean
 	 */
 	public boolean hasDefenders(Position pos) {
-		return defendPositions(pos) != null;
+		return defendingCluster(pos).size() >= 1;
 	}
 
 	/**
@@ -189,14 +195,14 @@ public class Board {
 	 * @return set
 	 */
 	public Set<Position> checkLibertyPositions(Position pos) {
-		
-		Set<Position> defendPositions = new HashSet<Position>();
+
+		Set<Position> defendingCluster = new HashSet<Position>();
 		Set<Position> libertyPositions = new HashSet<Position>();
 
-		for (Position p : defendPositions(pos)) defendPositions.add(p);
+		for (Position p : defendingCluster(pos)) defendingCluster.add(p);
 
 
-		for (Position p : defendPositions) {
+		for (Position p : defendingCluster) {
 			for (Position libertyPos : freePositions(p)) libertyPositions.add(libertyPos);
 		}
 
@@ -208,13 +214,72 @@ public class Board {
 	}
 
 	/**
-	 * checks if 
+	 * checks if pos is in Atari
 	 * @param position
 	 * @return boolean
 	 */
 	public boolean inAtari(Position pos) {
 		return numberOfLiberties(pos) == 1;
 	}
+
+	/**
+	 * checks if the placement of a stone is in accordance with the <i>ko-rule</i>
+	 * @param pos
+	 * @return boolean
+	 */
+	public boolean inKo(Position pos, Stone s) {
+
+
+		return false;
+	}
+
+	/**
+	 * checks if the placement of a stone on pos is legal
+	 * stone is placed outside of the dimensions of the board
+	 * stone is placed on an occupied spot (black, white)
+	 * stone is placed while recreating any previous board position (ko rule)
+	 * TODO more conditions for illegal moves???
+	 * @param pos, s
+	 * @return boolean
+	 */
+	public boolean isAllowed(Position pos, Stone s) {
+
+		if (!isPoint(pos)) {
+			System.out.println("Move not allowed: position does not exist on this playing board.");
+			return false;
+		}
+		if (!isEmptyPoint(pos)) {
+			System.out.println("Move not allowed: position occupied.");
+			return false;
+		}
+		if (inKo(pos, s)) {
+			System.out.println("Move not allowed: ko rule.");
+			return false;
+		}
+
+		return true;
+	}
+	
+    public boolean isWinner(Stone s) {
+      	return true;
+    }
+
+
+	public String toString() {
+		String s = "  1 2 3 4 5 6 7 8 9\n";
+		for (int i = 1; i <= dim; i++) {
+			String row = "" + i;
+			for (int j = 1; j <= dim; j++) {
+				row = row + " " + getPoint(new Position(i, j)).getStone().toString();
+			}
+			s = s + row;
+			if (i < dim) {
+				s = s + "\n";
+			}
+		}
+		return s;
+	}
+
 
 
 }
