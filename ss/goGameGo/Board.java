@@ -80,7 +80,6 @@ public class Board {
 	 * @param position, s
 	 */
 	public void setPoint(Position pos, Stone s) {
-		assert(this.isPoint(pos));
 		points.put(pos, new Point(s));
 	}
 
@@ -89,19 +88,23 @@ public class Board {
 	 * @param position
 	 * @return set
 	 */
-	public Set<Position> freePositions(Position pos) {
-		Set<Position> freePositions = new HashSet<Position>();
+	public Set<Position> freePositions(Map<Position, Point> nodes) {
+		Set<Position> freePositions = new HashSet<>();
 
-		assert(this.isPoint(pos));
-
-		for (int i = pos.x - 1; i <= pos.x + 1; pos.x++) {
-			if (getPoint(new Position(i, pos.y)).getStone() == Stone.EMPTY) {
-				freePositions.add(new Position(i,pos.y));
+		for(Position freepos : nodes.keySet()){
+			for (int i = freepos.x - 1; i <= freepos.x + 1; i++) {
+				while(isPoint(new Position(i, freepos.y))){
+					if (getPoint(new Position(i, freepos.y)).getStone() == Stone.EMPTY) {
+						freePositions.add(new Position(i, freepos.y));
+					}
+				}
 			}
-		}
-		for (int i = pos.y - 1; i <= pos.y + 1; pos.y++) {
-			if (getPoint(new Position(pos.x, i)).getStone() == Stone.EMPTY) {
-				freePositions.add(new Position(pos.x, i));
+			for (int i = freepos.y - 1; i <= freepos.y + 1; i++) {
+				while(isPoint(new Position(freepos.x, i))){
+					if (getPoint(new Position(freepos.x, i)).getStone() == Stone.EMPTY) {
+						freePositions.add(new Position(freepos.x, i));
+					}
+				}
 			}
 		}
 		return freePositions;
@@ -112,9 +115,8 @@ public class Board {
 	 * @param position
 	 * @return boolean
 	 */
-	public boolean hasLiberties(Position pos) {
-		assert(this.isPoint(pos));
-		return freePositions(pos) != null;
+	public boolean hasLiberties(Map<Position, Point> nodes) {
+		return freePositions(nodes).size() == 0;
 	}
 
 	/**
@@ -122,20 +124,18 @@ public class Board {
 	 * @param position
 	 * @return set
 	 */
-	public Set<Position> attackPositions(Position pos) {
+	public Map<Position, Point> attackPositions(Position pos) {
 		Stone attack = getPoint(pos).getStone().other();
-		Set<Position> attackPositions = new HashSet<Position>();
+		Map<Position, Point> attackPositions = new HashMap<>();
 
-		assert(this.isPoint(pos));
-
-		for (int i = pos.x - 1; i <= pos.x + 1; pos.x++) {
+		for (int i = pos.x - 1; i <= pos.x + 1; i++) {
 			if (getPoint(new Position(i, pos.y)).getStone() == attack) {
-				attackPositions.add(new Position(i, pos.y));
+				attackPositions.put(new Position(i, pos.y), getPoint(pos));
 			}
 		}
-		for (int i = pos.y - 1; i <= pos.y + 1; pos.y++) {
+		for (int i = pos.y - 1; i <= pos.y + 1; i++) {
 			if (getPoint(new Position(pos.x, i)).getStone() == attack) {
-				attackPositions.add(new Position(pos.x, i));
+				attackPositions.put(new Position(pos.x, i), getPoint(pos));
 			}
 		}
 		return attackPositions;
@@ -147,7 +147,7 @@ public class Board {
 	 * @return boolean
 	 */
 	public boolean hasAttackers(Position pos) {
-		return attackPositions(pos).size() != 0;
+		return !attackPositions(pos).isEmpty();
 	}
 
 	/**
@@ -155,29 +155,38 @@ public class Board {
 	 * @param position
 	 * @return set
 	 */
-	public Set<Position> defendingCluster(Position pos) {
-		Stone defend = getPoint(pos).getStone().other();
-		Set<Position> defendPositions = new HashSet<Position>();
-		defendPositions.add(pos);
-		int temp = 0;
+	public Map<Position, Point> defendingCluster(Position pos) {
+		Stone defend = getPoint(pos).getStone();
 
-		while (defendPositions.size() != temp) {
-			temp = defendPositions.size();
-			for(Position p : defendPositions) {
-				for (int i = p.x - 1; i <= p.x + 1; p.x++) {
-					if (getPoint(new Position(i, p.y)).getStone() == defend) {
-						defendPositions.add(new Position(i, p.y));
-					}
-				}
-				for (int i = pos.y - 1; i <= pos.y + 1; pos.y++) {
-					if (getPoint(new Position(pos.x, i)).getStone() == defend) {
-						defendPositions.add(new Position(pos.x, i));
-					}
+		if (!isEmptyPoint(pos)){
+			Map<Position, Point> defendPositions = new HashMap<>();
+			defendPositions.put(pos, getPoint(pos));
+			int temp = 0;
 
+			while (defendPositions.size() != temp) {
+				temp = defendPositions.size();
+				for(Position q : defendPositions.keySet()) {
+					for (int i = q.x - 1; i <= q.x + 1; i++) {
+						Position a = new Position(i, q.y);
+						while(isPoint(a)) {
+							if (getPoint(a).getStone() == defend) {
+								defendPositions.put(a, getPoint(q));
+							}
+						}
+					}
+					for (int i = q.y - 1; i <= dim; i++) {
+						Position a = new Position(q.x, i);
+						while(isPoint(a)) {
+							if (getPoint(a).getStone() == defend) {
+								defendPositions.put(a, getPoint(q));
+							}
+						}
+					}
 				}
 			}
+			return defendPositions;
 		}
-		return defendPositions;
+		return new HashMap<>();
 	}
 
 	/**
@@ -194,32 +203,36 @@ public class Board {
 	 * @param position
 	 * @return set
 	 */
-	public Set<Position> checkLibertyPositions(Position pos) {
-
-		Set<Position> defendingCluster = new HashSet<Position>();
-		Set<Position> libertyPositions = new HashSet<Position>();
-
-		for (Position p : defendingCluster(pos)) defendingCluster.add(p);
-
-
-		for (Position p : defendingCluster) {
-			for (Position libertyPos : freePositions(p)) libertyPositions.add(libertyPos);
-		}
-
-		return libertyPositions;
+	public Set<Position> libertyPositions(Position pos) {
+		return freePositions(defendingCluster(pos));
 	}
 
 	public int numberOfLiberties(Position pos) {
-		return checkLibertyPositions(pos).size();
+		return libertyPositions(pos).size();
 	}
 
 	/**
-	 * checks if pos is in Atari
-	 * @param position
-	 * @return boolean
+	 * replace the defending cluster stones (black, white) with EMPTY
+	 * 
+	 * @param pos
 	 */
-	public boolean inAtari(Position pos) {
-		return numberOfLiberties(pos) == 1;
+	public void autoRemove(Position pos) {
+		Set<Position> neighbours = new HashSet<>();
+		for (int i = pos.x - 1; i <= dim; i++) {
+			if (i < 1) i = 1;
+			if (i > dim) i = dim;
+			neighbours.add(new Position(i, pos.y));
+		}		
+		for (int i = pos.y - 1; i <= dim; i++) {
+			if (i < 1) i = 1;
+			if (i > dim) i = dim;
+			neighbours.add(new Position(pos.x, i));
+		}
+		for (Position p : neighbours) {
+			if (numberOfLiberties(p) == 0 && !isEmptyPoint(p)) {
+				setPoint(p, Stone.EMPTY);
+			}
+		}
 	}
 
 	/**
@@ -259,14 +272,20 @@ public class Board {
 
 		return true;
 	}
-	
-    public boolean isWinner(Stone s) {
-      	return true;
-    }
+
+
+	public boolean isWinner(Stone s) {
+		return false;
+	}
 
 
 	public String toString() {
-		String s = "  1 2 3 4 5 6 7 8 9\n";
+		String s = "  ";
+
+		for (int i = 1; i <= dim; i++) {
+			s = s + i + " ";
+		}
+		s = s + "\n";
 		for (int i = 1; i <= dim; i++) {
 			String row = "" + i;
 			for (int j = 1; j <= dim; j++) {
