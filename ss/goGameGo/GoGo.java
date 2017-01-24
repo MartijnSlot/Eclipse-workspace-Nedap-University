@@ -82,11 +82,11 @@ public class GoGo {
 //		gogui.setBoardSize(dim);
 
 
-		game = new Game(new Player("jan", Stone.BLACK), new Player("piet", Stone.WHITE), 5);
+		game = new Game(new Player("jan", Stone.BLACK), new Player("piet", Stone.WHITE), 4);
 
-		gogui = new GoGUIIntegrator(false, true, 5);
+		gogui = new GoGUIIntegrator(false, true, 4);
 		gogui.startGUI();
-		gogui.setBoardSize(5);
+		gogui.setBoardSize(4);
 
 
 

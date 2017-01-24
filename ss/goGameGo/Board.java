@@ -6,10 +6,6 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * TODO make TGUI for all dims. Coordinate error occurs with double digits.
- */
-
-/**
  * Represents a board in a Go game.
  *
  * @author Martijn Slot
@@ -19,7 +15,7 @@ public class Board {
 
 	int dim;
 	private Map<Position, Point> points = new HashMap<>();
-	private Set<Board> history = new HashSet<>();
+	Set<Board> history = new HashSet<>();
 
 	/**
 	 * constructor of board of size dim * dim, containing only EMPTY fields.
@@ -35,16 +31,6 @@ public class Board {
 		}
 	}
 
-	/**
-	 * Returns a deep copy of this board and puts it is a set of board called history.
-	 * @return board
-	 */
-	public Set<Board> writeToHistory() {
-		Board copy = new Board(this.dim);
-		copy.points = new HashMap<Position, Point>(this.points);
-		history.add(copy);
-		return history;
-	}
 
 	/**
 	 * Returns true when the point at position exists.
@@ -52,16 +38,15 @@ public class Board {
 	 * @return boolean
 	 */
 	public boolean isPoint(Position pos) {
-		return (points.containsKey(pos));
+		return (this.points.containsKey(pos));
 	}
 
 	/**
-	 * Returns the point at position, asserting this point exists.
+	 * Returns the point at position.
 	 * @param position
 	 * @return point
 	 */
 	public Point getPoint(Position pos) {
-		assert(this.isPoint(pos));
 		return points.get(pos);
 	}
 
@@ -71,132 +56,128 @@ public class Board {
 	 * @return boolean
 	 */
 	public boolean isEmptyPoint(Position pos) {
-		assert(this.isPoint(pos));
 		return (this.getPoint(pos).getStone() == Stone.EMPTY);
 	}
 
 	/**
-	 * Sets a point at position, asserting this point exists.
+	 * Sets a point at position.
 	 * @param position, s
 	 */
 	public void setPoint(Position pos, Stone s) {
 		points.put(pos, new Point(s));
 	}
+	
+	/**
+	 * Empties a position / removes a stone.
+	 * @param position
+	 */
+	public void removePoint(Position pos) {
+		points.put(pos, new Point(Stone.EMPTY));
+	}
+	
+	/**
+	 * Returns a set of 2 (corner), 3 (edge) or 4 (center) neighbours of a specific position
+	 * @param pos
+	 * @return set
+	 */
+	public Set<Position> getNeighbours(Position pos){
+		Set<Position> neighbours = new HashSet<>();
+
+		for (int i = pos.x - 1; i <= pos.x + 1; i++) {
+			Position a = new Position(i, pos.y);
+			if (isPoint(a)) {
+				neighbours.add(a);
+			}
+		}
+		for (int i = pos.y - 1; i <= pos.y + 1; i++) {
+			Position a = new Position(pos.x, i);
+			if (isPoint(a)){
+				neighbours.add(a);
+			}
+		}
+		return neighbours;
+	} 
+
 
 	/**
 	 * Returns all empty positions surrounding argument position.
 	 * @param position
 	 * @return set
 	 */
-	public Set<Position> freePositions(Map<Position, Point> nodes) {
+	public Set<Position> freePositions(Set<Position> cluster) {
 		Set<Position> freePositions = new HashSet<>();
 
-		for(Position freepos : nodes.keySet()){
-			for (int i = freepos.x - 1; i <= freepos.x + 1; i++) {
-				while(isPoint(new Position(i, freepos.y))){
-					if (getPoint(new Position(i, freepos.y)).getStone() == Stone.EMPTY) {
-						freePositions.add(new Position(i, freepos.y));
-					}
-				}
-			}
-			for (int i = freepos.y - 1; i <= freepos.y + 1; i++) {
-				while(isPoint(new Position(freepos.x, i))){
-					if (getPoint(new Position(freepos.x, i)).getStone() == Stone.EMPTY) {
-						freePositions.add(new Position(freepos.x, i));
-					}
-				}
+		for(Position clusterpos : cluster){
+			for (Position p : getNeighbours(clusterpos)) {
+				if (getPoint(p).getStone() == Stone.EMPTY) freePositions.add(p);
 			}
 		}
 		return freePositions;
 	} 
 
-	/**
-	 * checks if position has Liberties
-	 * @param position
-	 * @return boolean
-	 */
-	public boolean hasLiberties(Map<Position, Point> nodes) {
-		return freePositions(nodes).size() == 0;
-	}
+//	/**
+//	 * checks if position has Liberties
+//	 * @param position
+//	 * @return boolean
+//	 */
+//	public boolean hasLiberties(Set<Position> nodes) {
+//		return freePositions(nodes).size() == 0;
+//	}
 
-	/**
-	 * Returns all attacking stone positions surrounding argument position.
-	 * @param position
-	 * @return set
-	 */
-	public Map<Position, Point> attackPositions(Position pos) {
-		Stone attack = getPoint(pos).getStone().other();
-		Map<Position, Point> attackPositions = new HashMap<>();
+//	/**
+//	 * Returns all attacking stone positions surrounding argument position. //TODO finish if necessary
+//	 * @param position
+//	 * @return set
+//	 */
+//	public Set<Position> attackPositions(Position pos) {
+//		Stone attack = getPoint(pos).getStone().other();
+//		Set<Position> attackPositions = new HashSet<>();
+//
+//		return attackPositions;
+//	}
 
-		for (int i = pos.x - 1; i <= pos.x + 1; i++) {
-			if (getPoint(new Position(i, pos.y)).getStone() == attack) {
-				attackPositions.put(new Position(i, pos.y), getPoint(pos));
-			}
-		}
-		for (int i = pos.y - 1; i <= pos.y + 1; i++) {
-			if (getPoint(new Position(pos.x, i)).getStone() == attack) {
-				attackPositions.put(new Position(pos.x, i), getPoint(pos));
-			}
-		}
-		return attackPositions;
-	}
-
-	/**
-	 * checks if position has attacking stones
-	 * @param position
-	 * @return boolean
-	 */
-	public boolean hasAttackers(Position pos) {
-		return !attackPositions(pos).isEmpty();
-	}
+//	/**
+//	 * checks if position has attacking stones
+//	 * @param position
+//	 * @return boolean
+//	 */
+//	public boolean hasAttackers(Position pos) {
+//		return !attackPositions(pos).isEmpty();
+//	}
 
 	/**
 	 * Returns a cluster of defending stone positions in which position pos is situated.
 	 * @param position
 	 * @return set
 	 */
-	public Map<Position, Point> defendingCluster(Position pos) {
+	public Set<Position> defendingCluster(Position pos) {
 		Stone defend = getPoint(pos).getStone();
+		Set<Position> defendingCluster = new HashSet<>();
+		Set<Position> temp = new HashSet<>();
 
-		if (!isEmptyPoint(pos)){
-			Map<Position, Point> defendPositions = new HashMap<>();
-			defendPositions.put(pos, getPoint(pos));
-			int temp = 0;
+		defendingCluster.add(pos);
 
-			while (defendPositions.size() != temp) {
-				temp = defendPositions.size();
-				for(Position q : defendPositions.keySet()) {
-					for (int i = q.x - 1; i <= q.x + 1; i++) {
-						Position a = new Position(i, q.y);
-						while(isPoint(a)) {
-							if (getPoint(a).getStone() == defend) {
-								defendPositions.put(a, getPoint(q));
-							}
-						}
-					}
-					for (int i = q.y - 1; i <= dim; i++) {
-						Position a = new Position(q.x, i);
-						while(isPoint(a)) {
-							if (getPoint(a).getStone() == defend) {
-								defendPositions.put(a, getPoint(q));
-							}
-						}
+		while (!(temp.size() == defendingCluster.size())){
+			temp = defendingCluster;
+			for (Position p : temp) {
+				for (Position q : getNeighbours(p)) {
+					if(isPoint(q) && getPoint(q).getStone() == defend){
+						defendingCluster.add(q);
 					}
 				}
 			}
-			return defendPositions;
 		}
-		return new HashMap<>();
+		return defendingCluster;
 	}
 
-	/**
-	 * checks if position has defending stones
-	 * @param position
-	 * @return boolean
-	 */
-	public boolean hasDefenders(Position pos) {
-		return defendingCluster(pos).size() >= 1;
-	}
+//	/**
+//	 * checks if position has defending stones
+//	 * @param position
+//	 * @return boolean
+//	 */
+//	public boolean hasDefenders(Position pos) {
+//		return defendingCluster(pos).size() >= 1;
+//	}
 
 	/**
 	 * Returns all liberty positions surrounding argument position (even if arguments exists in cluster of samecolor stones).
@@ -207,6 +188,11 @@ public class Board {
 		return freePositions(defendingCluster(pos));
 	}
 
+	/**
+	 * Returns number of liberties of argument (even if arguments exists in cluster of samecolor stones).
+	 * @param position
+	 * @return int
+	 */
 	public int numberOfLiberties(Position pos) {
 		return libertyPositions(pos).size();
 	}
@@ -217,33 +203,51 @@ public class Board {
 	 * @param pos
 	 */
 	public void autoRemove(Position pos) {
-		Set<Position> neighbours = new HashSet<>();
-		for (int i = pos.x - 1; i <= dim; i++) {
-			if (i < 1) i = 1;
-			if (i > dim) i = dim;
-			neighbours.add(new Position(i, pos.y));
-		}		
-		for (int i = pos.y - 1; i <= dim; i++) {
-			if (i < 1) i = 1;
-			if (i > dim) i = dim;
-			neighbours.add(new Position(pos.x, i));
+		Set<Position> a = new HashSet<>();
+			a.add(new Position(pos.x - 1, pos.y));
+			a.add(new Position(pos.x + 1, pos.y));
+			a.add(new Position(pos.x, pos.y - 1));
+			a.add(new Position(pos.x, pos.y + 1));
+		for (Position p : a) {
+			if (isPoint(p) && !isEmptyPoint(p) && numberOfLiberties(p) == 0) {	
+				for (Position q : defendingCluster(p)) {
+					setPoint(q, Stone.EMPTY);
+//					GoGo.gogui.removeStone(q.y - 1, q.x - 1);
+				}
+			}
 		}
-		for (Position p : neighbours) {
-			if (numberOfLiberties(p) == 0 && !isEmptyPoint(p)) {
-				setPoint(p, Stone.EMPTY);
+		if (!isEmptyPoint(pos) && numberOfLiberties(pos) == 0) {	
+			for (Position r : defendingCluster(pos)) {
+				setPoint(r, Stone.EMPTY);
+//				GoGo.gogui.removeStone(r.y - 1, r.x - 1);
 			}
 		}
 	}
 
+	/**
+	 * Deep copy of this board.
+	 * @return board
+	 */
+	public void writeHistory() {
+		Board copy = new Board(this.dim);
+		copy.points = new HashMap<Position, Point>(this.points);
+		history.add(copy);
+	}
+	
 	/**
 	 * checks if the placement of a stone is in accordance with the <i>ko-rule</i>
 	 * @param pos
 	 * @return boolean
 	 */
 	public boolean inKo(Position pos, Stone s) {
-
-
+		setPoint(pos, s);
+		if (history.contains(this))	{
+			removePoint(pos);
+			return true;
+		}
+		removePoint(pos);
 		return false;
+		 
 	}
 
 	/**
@@ -269,16 +273,23 @@ public class Board {
 			System.out.println("Move not allowed: ko rule.");
 			return false;
 		}
-
 		return true;
 	}
 
-
+	/**
+	 * checks if player with stone s is the winner
+	 * @param s
+	 * @return boolean
+	 */
 	public boolean isWinner(Stone s) {
 		return false;
 	}
 
 
+	/**
+	 * Prints a GTUI
+	 * @return String GTUI
+	 */
 	public String toString() {
 		String s = "  ";
 
@@ -300,5 +311,28 @@ public class Board {
 	}
 
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + dim;
+		result = prime * result + ((points == null) ? 0 : points.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		Board other = (Board) obj;	
+		if (dim != other.dim) return false;
+		if (points == null) {
+			if (other.points != null)
+				return false;
+		} else if (!points.equals(other.points))
+			return false;
+		return true;
+	}
 
 }

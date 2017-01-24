@@ -45,9 +45,11 @@ public class Game {
 	}
 
 	public void play() throws IOException {
+		updateTUI();
 		while (!board.isWinner(Stone.BLACK) || !board.isWinner(Stone.WHITE)) {
 			players[currentPlayer].makeMove(board, askMove());
 			currentPlayer = (currentPlayer + 1) % numberPlayers;
+			updateTUI();
 		}
 	}
 
@@ -63,7 +65,7 @@ public class Game {
 			legalchoice = true;
 			String prompt = "Dear " + players[currentPlayer].getName() + " ("
 					+ players[currentPlayer].getStone().toString() + ")"
-					+ ", please enter positions x,y (x and y must be on the board and can't be larger than " + board.dim
+					+ ", please enter positions row, column (row and column integers must exist on the board) " + board.dim
 					+ ") ";
 			choice = readPos(prompt);
 			legalchoice = true;
@@ -90,11 +92,11 @@ public class Game {
 			if (xy.length != 2) {
 				System.out.println(
 						"Input coordina-te-rror! Please put 2 coordinates (x,y) in the input seperated by any number of non-digits.");
-			} else if (!board.isAllowed(new Position(xy[1], xy[0]), players[currentPlayer].getStone())) {
-				System.out.println("Field " + xy[1] + ", " + xy[0] + " is no valid position.");
+			} else if (!board.isAllowed(new Position(xy[0], xy[1]), players[currentPlayer].getStone())) {
+				System.out.println("Field " + xy[0] + ", " + xy[1] + " is no valid position.");
 			} else {
 				legalpos = true;
-				return new Position(xy[1], xy[0]);
+				return new Position(xy[0], xy[1]);
 			}
 		}
 		return null;
