@@ -69,21 +69,21 @@ public class KoTest {
 	
 	@Test
 	public void testKO() throws IOException {
-		player2.makeMove(game.getBoard(), new Position(2,1));
-		player2.makeMove(game.getBoard(), new Position(1,2));
-		player2.makeMove(game.getBoard(), new Position(3,2));
-		player2.makeMove(game.getBoard(), new Position(2,3));
+		player2.makeMove(game.getBoard(), game.checkPos("1,3"));
+		game.writeHistory();
+		player2.makeMove(game.getBoard(), game.checkPos("2,1"));
+		game.writeHistory();		
+		player2.makeMove(game.getBoard(), game.checkPos("2,2"));
+		game.writeHistory();
+		player2.makeMove(game.getBoard(), game.checkPos("1,2"));
+		game.writeHistory();
+		player2.makeMove(game.getBoard(), game.checkPos("1,1"));
+		game.writeHistory();
+		player2.makeMove(game.getBoard(), game.checkPos("1,2"));
 		
-		player1.makeMove(game.getBoard(), new Position(1,3));
-		player1.makeMove(game.getBoard(), new Position(2,4));
-		player1.makeMove(game.getBoard(), new Position(3,3));
-		player1.makeMove(game.getBoard(), new Position(2,2));
+
 		
-		player2.makeMove(game.getBoard(), game.checkPos("2 3 "));
-		
-		game.updateTUI();
-		
-		assertTrue(game.getBoard().isEmptyPoint(new Position(2,3)));
+		assertTrue(game.getBoard().isEmptyPoint(new Position(1,2)));
 
 	}
 }

@@ -3,6 +3,7 @@ package goGameGo;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -28,6 +29,14 @@ public class Board {
 				this.points.put(new Position(x,y), new Point(Stone.EMPTY));
 			}
 		}
+	}
+	
+	public int getDim() {
+		return dim;
+	}
+	
+	public Map<Position, Point> getPoints() {
+		return points;
 	}
 
 
@@ -251,13 +260,22 @@ public class Board {
 	}
 
 
+	public String toSimpleString() {
+		String boardString = "";
+		for (int i = 1; i <= dim; i++) {
+			for (int j = 1; j <= dim; j++) {
+				boardString = boardString + getPoint(new Position(i, j)).getStone().toString();
+			}
+		}
+		return boardString;
+	}
+	
 	/**
 	 * Prints a GTUI
 	 * @return String GTUI
 	 */
 	public String toString() {
 		String s = "  ";
-
 		for (int i = 1; i <= dim; i++) {
 			s = s + i + " ";
 		}
@@ -274,30 +292,4 @@ public class Board {
 		}
 		return s;
 	}
-
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + dim;
-		result = prime * result + ((points == null) ? 0 : points.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		Board other = (Board) obj;	
-		if (dim != other.dim) return false;
-		if (points == null) {
-			if (other.points != null)
-				return false;
-		} else if (!points.equals(other.points))
-			return false;
-		return true;
-	}
-
 }

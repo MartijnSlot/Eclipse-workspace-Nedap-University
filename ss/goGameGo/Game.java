@@ -19,7 +19,7 @@ public class Game {
 	private Board board;
 	private Player[] players;
 	private int currentPlayer;
-	Set<Board> history = new HashSet<>();
+	public Set<String> history = new HashSet<>();
 
 	public Game(Player s0, Player s1, int dim) {
 		board = new Board(dim);
@@ -112,7 +112,7 @@ public class Game {
 						"Input coordina-te-rror! Please put 2 coordinates (row, column) in the input seperated by any number of non-digits.");
 			} else if (!board.isAllowed(new Position(xy[0], xy[1]))) {
 				System.out.println("Field " + xy[0] + ", " + xy[1] + " is no valid position.");
-			} else if(inKo(new Position(xy[0], xy[1]), players[currentPlayer].getStone())) {
+			} else if (inKo(new Position(xy[0], xy[1]))) {
 				System.out.println("Field " + xy[0] + ", " + xy[1] + " is in Ko. \n\n\nMaar wie is die Ko dan?");
 			} else {
 				legalpos = true;
@@ -127,9 +127,7 @@ public class Game {
 	 * @return board
 	 */
 	public void writeHistory() {
-		Board copy = new Board(this.board.dim);
-		copy.points = new HashMap<Position, Point>(this.board.points);
-		history.add(copy);
+		history.add(this.board.toSimpleString());
 	}
 
 	/**
@@ -137,11 +135,21 @@ public class Game {
 	 * @param pos
 	 * @return boolean
 	 */
-	public boolean inKo(Position pos, Stone s) {
-		this.players[currentPlayer].makeMove(this.board, pos);
-		if (history.contains(this))	{
-			board.removePoint(pos);
-			return true;
+	public boolean inKo(Position pos) {
+		this.players[0].makeMove(this.board, pos);
+		for(String b : history) {
+			if (this.board.toSimpleString().equals(b)) {
+				board.removePoint(pos);
+				return true;
+			}
+		}
+		board.removePoint(pos);
+		this.players[1].makeMove(this.board, pos);
+		for(String b : history) {
+			if (this.board.toSimpleString().equals(b)) {
+				board.removePoint(pos);
+				return true;
+			}
 		}
 		board.removePoint(pos);
 		return false;
