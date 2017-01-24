@@ -34,10 +34,10 @@ public class Player {
 			white = false;
 		}
 //		GoGo.gogui.addStone(pos.y - 1, pos.x - 1, white);
-		
+
 		board.autoRemove(pos);
-		board.writeHistory();
 	}
+
 }
 
 
