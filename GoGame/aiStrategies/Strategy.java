@@ -1,6 +1,6 @@
 package aiStrategies;
 
-import Model.Position;
+import model.Position;
 
 public abstract class Strategy {
 	

@@ -1,12 +1,13 @@
-package Controller;
+package controller;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import Model.Player;
-import Model.Stone;
-import Viewer.GoGUIIntegrator;
+import model.Player;
+import model.Position;
+import model.Stone;
+import viewer.GoGUIIntegrator;
 
 public class LocalGoGo {
 
@@ -15,7 +16,7 @@ public class LocalGoGo {
 
 	public static void main(String[] args) throws IOException {
 		initialize();
-		game.play();
+		game.play(game.askMove()); // TODO creates infinite loop
 	}
 
 	public static void initialize() throws IOException {

@@ -1,4 +1,4 @@
-package Controller;
+package controller;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,10 +6,10 @@ import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
 
-import Model.Board;
-import Model.Player;
-import Model.Position;
-import Model.Stone;
+import model.Board;
+import model.Player;
+import model.Position;
+import model.Stone;
 
 /**
  * Class for maintaining a GO game.
@@ -21,8 +21,8 @@ public class Game {
 
 	public int numberPlayers = 2;
 	private Board board;
-	private Player[] players;
-	private int currentPlayer;
+	public Player[] players;
+	public int currentPlayer;
 	public Set<String> history = new HashSet<>();
 
 	public Game(Player s0, Player s1, int dim) {
@@ -52,14 +52,28 @@ public class Game {
 		return currentPlayer;
 	}
 
-	public void play() throws IOException {
+	/**
+	 * As long as there is no winner, players keep playing turns
+	 * @param a
+	 */
+	public void play(Position a) {
 		updateTUI();
 		while (!board.isWinner(Stone.BLACK) || !board.isWinner(Stone.WHITE)) {
-			players[currentPlayer].makeMove(board, askMove());
+			players[currentPlayer].makeMove(board, a);
 			writeHistory();
 			currentPlayer = (currentPlayer + 1) % numberPlayers;
 			updateTUI();
 		}
+	}
+
+	/**
+	 * As long as there is no winner, a players switches turns with a pass
+	 */
+	public void passMove() {
+		while (!board.isWinner(Stone.BLACK) || !board.isWinner(Stone.WHITE)) {
+			currentPlayer = (currentPlayer + 1) % numberPlayers;
+		}
+
 	}
 
 	/**
@@ -70,11 +84,12 @@ public class Game {
 	}
 
 	/**
-	 * asks the client for a move
+	 * asks the client for a move, 
+	 * ONLY FOR LOCAL PLAY
 	 * @return position
 	 * @throws IOException
 	 */
-	private Position askMove() throws IOException {
+	Position askMove() throws IOException {
 		boolean legalchoice = false;
 		Position choice = null;
 
@@ -90,8 +105,10 @@ public class Game {
 
 		return choice;
 	}
+
 	/**
 	 * checks the position given by the client for legality
+	 * ONLY FOR LOCAL PLAY
 	 * @param prompt
 	 * @return Position
 	 * @throws IOException

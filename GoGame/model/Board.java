@@ -1,4 +1,4 @@
-package Model;
+package model;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -215,14 +215,12 @@ public class Board {
 			if (isPoint(p) && !isEmptyPoint(p) && numberOfLiberties(p) == 0) {	
 				for (Position q : defendingCluster(p)) {
 					setPoint(q, Stone.EMPTY);
-//					GoGo.gogui.removeStone(q.y - 1, q.x - 1);
 				}
 			}
 		}
 		if (!isEmptyPoint(pos) && numberOfLiberties(pos) == 0) {	
 			for (Position r : defendingCluster(pos)) {
 				setPoint(r, Stone.EMPTY);
-//				GoGo.gogui.removeStone(r.y - 1, r.x - 1);
 			}
 		}
 	}

@@ -1,10 +1,10 @@
-package Tests;
+package tests;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import Controller.*;
-import Model.*;
+import controller.*;
+import model.*;
 
 import static org.junit.Assert.assertTrue;
 

@@ -1,4 +1,4 @@
-package Viewer;
+package viewer;
 
 /**
  * Created by daan.vanbeek on 15-12-16.

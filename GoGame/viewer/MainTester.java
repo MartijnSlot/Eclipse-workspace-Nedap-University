@@ -1,4 +1,4 @@
-package Viewer;
+package viewer;
 
 /**
  * Example on how to use the GOGUI
