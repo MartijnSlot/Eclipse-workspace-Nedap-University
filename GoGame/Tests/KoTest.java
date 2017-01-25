@@ -3,17 +3,13 @@ package Tests;
 import org.junit.Before;
 import org.junit.Test;
 
-import Controller.Game;
-import Model.Player;
-import Model.Position;
-import Model.Stone;
+import Controller.*;
+import Model.*;
 
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Set;
-
-import goGameGo.*;
 
 public class KoTest {
 

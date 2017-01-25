@@ -3,7 +3,6 @@ package Model;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -14,7 +13,7 @@ import java.util.Set;
  */
 public class Board {
 
-	int dim;
+	public int dim;
 	Map<Position, Point> points = new HashMap<>();
 
 	/**

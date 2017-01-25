@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 
 import Model.Player;
 import Model.Stone;
-import go.gui.GoGUIIntegrator;
+import Viewer.GoGUIIntegrator;
 
 public class LocalGoGo {
 
