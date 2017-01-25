@@ -46,7 +46,7 @@ public class GoClient implements Runnable {
 			System.out.println(msg);
 	}
 
-	public void start() throws IOException {
+	public void start() {
 	}
 
 	public void stop() {

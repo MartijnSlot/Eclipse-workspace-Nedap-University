@@ -5,7 +5,7 @@ import java.net.Socket;
 
 import Client.GoClient;
 
-public class GoServerThread extends Thread {
+public class MiniServer extends Thread {
 
 	private GoServer server;
 	private Socket socket;
@@ -18,8 +18,8 @@ public class GoServerThread extends Thread {
 	private int dim;
 
 
-	public GoServerThread(GoServer server, Socket s) {
-		this.server = server;
+	public MiniServer(Socket s) {
+		super("Miniserver");
 		this.socket = s;
 	}
 
@@ -34,32 +34,15 @@ public class GoServerThread extends Thread {
 				clientName = inputMessage[1];
 				dim = Integer.parseInt(inputMessage[2]);
 				start();
-//			} else if (inputMessage[0] == "MOVE") {
-//				server.checkMove();				
-//			} else if (inputMessage[0] == "PASS") {
-//				server.pass();
-//			} else if (inputMessage[0] == "TABLEFLIP") {
-//				server.tableflip();
+			} else if (inputMessage[0] == "MOVE") {
+				server.checkMove();				
+			} else if (inputMessage[0] == "PASS") {
+				server.pass();
+			} else if (inputMessage[0] == "TABLEFLIP") {
+				server.tableflip();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
-	public void start() {
-		if (thread == null) {
-			thread = new Thread();
-			thread.start();
-		}
-	}
-
-	public void announceName() throws IOException {
-		clientName = input.readLine();
-		server.sendToAllPlayers("[" + clientName + " has entered]");
-	}
-
-	public int getID() {
-		return ID;
-	}
-
 }
