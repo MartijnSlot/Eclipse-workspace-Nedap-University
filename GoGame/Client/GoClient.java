@@ -10,14 +10,13 @@ public class GoClient implements Runnable {
 	private Thread thread = null;
 	private DataInputStream console = null;
 	private DataOutputStream streamOut = null;
-	private GameThread client = null;
 	private String name;
 
-	public GoClient(String serverName, int serverPort, String name) {
+	public GoClient(String serverAdress, int serverPort, String name) {
 		System.out.println("Establishing connection. Please wait ...");
 		this.name = name;
 		try {
-			socket = new Socket(serverName, serverPort);
+			socket = new Socket(serverAdress, serverPort);
 			System.out.println("Connected: " + socket);
 			start();
 		} catch (UnknownHostException uhe) {
@@ -48,32 +47,9 @@ public class GoClient implements Runnable {
 	}
 
 	public void start() throws IOException {
-		console = new DataInputStream(System.in);
-		streamOut = new DataOutputStream(socket.getOutputStream());
-		if (thread == null) {
-			client = new GameThread(this, socket);
-			thread = new Thread(this);
-			thread.start();
-		}
 	}
 
 	public void stop() {
-		if (thread != null) {
-			thread.stop();
-			thread = null;
-		}
-		try {
-			if (console != null)
-				console.close();
-			if (streamOut != null)
-				streamOut.close();
-			if (socket != null)
-				socket.close();
-		} catch (IOException ioe) {
-			System.out.println("Error closing ...");
-		}
-		client.close();
-		client.stop();
 	}
 
 	public static void main(String args[]) {

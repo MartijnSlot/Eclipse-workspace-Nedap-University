@@ -14,10 +14,8 @@ public class LocalGoGo {
 	public static GoGUIIntegrator gogui;
 
 	public static void main(String[] args) throws IOException {
-
 		initialize();
 		game.play();
-
 	}
 
 	public static void initialize() throws IOException {
