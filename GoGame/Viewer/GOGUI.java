@@ -1,4 +1,4 @@
-package go.gui;
+package Viewer;
 
 /**
  * Created by daan.vanbeek on 13-12-16.

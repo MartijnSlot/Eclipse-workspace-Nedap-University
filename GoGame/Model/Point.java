@@ -1,4 +1,4 @@
-package goGameGo;
+package Model;
 
 public class Point {
 	

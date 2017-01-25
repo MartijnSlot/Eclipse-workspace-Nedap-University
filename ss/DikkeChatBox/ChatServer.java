@@ -4,6 +4,8 @@ import java.net.*;
 import java.io.*;
 
 public class ChatServer implements Runnable {
+	
+	
 	private ChatServerMartijnThread clients[] = new ChatServerMartijnThread[50];
 	private ServerSocket server = null;
 	private Thread thread = null;
@@ -11,7 +13,7 @@ public class ChatServer implements Runnable {
 
 	public ChatServer(int port) {
 		try {
-			System.out.println("Binding to port " + port + ", please wait  ...");
+			System.out.println("Opening port " + port + ", please wait  ...");
 			server = new ServerSocket(port);
 			System.out.println("Server started: " + server);
 			start();
@@ -33,17 +35,9 @@ public class ChatServer implements Runnable {
 	}
 
 	public void start() {
-		if (thread == null) {
-			thread = new Thread(this);
-			thread.start();
-		}
 	}
 
 	public void stop() {
-		if (thread != null) {
-			thread.stop();
-			thread = null;
-		}
 	}
 
 	private int findClient(int ID) {
@@ -54,8 +48,8 @@ public class ChatServer implements Runnable {
 	}
 
 	public synchronized void handle(int ID, String input) {
-		if (input.equals(".bye")) {
-			clients[findClient(ID)].send(".bye");
+		if (input.equals(".disconnect")) {
+			clients[findClient(ID)].send(".disconnect");
 			remove(ID);
 		} else
 			for (int i = 0; i < clientCount; i++)

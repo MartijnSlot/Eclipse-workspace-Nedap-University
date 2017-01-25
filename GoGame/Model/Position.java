@@ -1,4 +1,4 @@
-package goGameGo;
+package Model;
 
 import java.util.Objects;
 

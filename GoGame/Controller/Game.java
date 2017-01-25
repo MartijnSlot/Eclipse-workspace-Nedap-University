@@ -1,4 +1,4 @@
-package goGameGo;
+package Controller;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,6 +6,11 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+
+import Model.Board;
+import Model.Player;
+import Model.Position;
+import Model.Stone;
 
 /**
  * Class for maintaining a GO game.
@@ -109,11 +114,11 @@ public class Game {
 			}
 			if (xy.length != 2) {
 				System.out.println(
-						"Input coordina-te-rror! Please put 2 coordinates (row, column) in the input seperated by any number of non-digits.");
+						"\nInput coordina-te-rror! Please put 2 coordinates (row, column) in the input seperated by any number of non-digits.");
 			} else if (!board.isAllowed(new Position(xy[0], xy[1]))) {
-				System.out.println("Field " + xy[0] + ", " + xy[1] + " is no valid position.");
+				System.out.println("\nField " + xy[0] + ", " + xy[1] + " is no valid position.");
 			} else if (inKo(new Position(xy[0], xy[1]))) {
-				System.out.println("Field " + xy[0] + ", " + xy[1] + " is in Ko. \n\n\nMaar wie is die Ko dan?");
+				System.out.println("\nField " + xy[0] + ", " + xy[1] + " is in Ko. \n\nMaar wie is die Ko dan?");
 			} else {
 				legalpos = true;
 				return new Position(xy[0], xy[1]);

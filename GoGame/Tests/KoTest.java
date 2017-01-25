@@ -1,7 +1,13 @@
-package goGameGo.test;
+package Tests;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import Controller.Game;
+import Model.Player;
+import Model.Position;
+import Model.Stone;
+
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -79,8 +85,9 @@ public class KoTest {
 		game.writeHistory();
 		player2.makeMove(game.getBoard(), game.checkPos("1,1"));
 		game.writeHistory();
+		game.updateTUI();
 		player2.makeMove(game.getBoard(), game.checkPos("1,2"));
-		
+		game.updateTUI();
 
 		
 		assertTrue(game.getBoard().isEmptyPoint(new Position(1,2)));

@@ -1,12 +1,14 @@
-package goGameGo;
+package Controller;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import Model.Player;
+import Model.Stone;
 import go.gui.GoGUIIntegrator;
 
-public class GoGo {
+public class LocalGoGo {
 
 	private static Game game;
 	public static GoGUIIntegrator gogui;

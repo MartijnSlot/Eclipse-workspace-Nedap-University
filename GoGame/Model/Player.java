@@ -1,4 +1,4 @@
-package goGameGo;
+package Model;
 
 /**
  * Abstract class for keeping a player in a GO game. 

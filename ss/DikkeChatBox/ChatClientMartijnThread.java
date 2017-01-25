@@ -6,7 +6,7 @@ import java.io.*;
 public class ChatClientMartijnThread extends Thread {
 	private Socket socket = null;
 	private ChatClientMartijn client = null;
-	private DataInputStream streamIn = null;
+	private BufferedReader streamIn = null;
 
 	public ChatClientMartijnThread(ChatClientMartijn _client, Socket _socket) {
 		client = _client;
@@ -17,7 +17,7 @@ public class ChatClientMartijnThread extends Thread {
 
 	public void open() {
 		try {
-			streamIn = new DataInputStream(socket.getInputStream());
+			streamIn = new BufferedReader(new DataInputStream(socket.getInputStream()));
 		} catch (IOException ioe) {
 			System.out.println("Error getting input stream: " + ioe);
 			client.stop();

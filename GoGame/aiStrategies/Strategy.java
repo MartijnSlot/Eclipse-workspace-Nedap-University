@@ -1,4 +1,6 @@
-package goGameGo;
+package aiStrategies;
+
+import Model.Position;
 
 public abstract class Strategy {
 	

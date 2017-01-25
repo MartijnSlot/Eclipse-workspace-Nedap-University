@@ -1,4 +1,4 @@
-package goGameGo;
+package Model;
 
 /**
  * Represents a Stone in a GO game. There three possible values:

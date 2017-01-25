@@ -1,4 +1,4 @@
-package go.gui;
+package Viewer;
 
 /**
  * Example on how to use the GOGUI

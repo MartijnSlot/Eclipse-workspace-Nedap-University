@@ -1,4 +1,4 @@
-package go.gui;
+package Viewer;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
