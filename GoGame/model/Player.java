@@ -3,6 +3,7 @@ package model;
 import java.util.HashSet;
 import java.util.Set;
 
+import controller.Game;
 import controller.LocalGoGo;
 
 /**
@@ -15,11 +16,15 @@ public class Player {
 
 	public String name;
 	public Stone stone;
+	public boolean pass;
 
 	public Player(String name, Stone stone) {
 		this.name = name;
 		this.stone = stone;
+		this.pass = false;
 	}
+	
+	// -- QUERIES
 
 	public String getName() {
 		return name;
@@ -28,11 +33,19 @@ public class Player {
 	public Stone getStone() {
 		return stone;
 	}
+	
+	// -- METHODS
 
 
 	public void makeMove(Board board, Position pos) {
 		board.setPoint(pos, this.getStone());	
 		board.autoRemove(pos);
+	}
+	
+	public void passes() {
+		if (this.getStone() == Stone.WHITE && otherplayer.pass = true) { //TODO
+//			end game
+		}
 	}
 
 	public void guiMove(Position pos) {
@@ -63,6 +76,13 @@ public class Player {
 			}
 		}
 	}
+	
+	public boolean isWinner() {
+		if (this)		
+		return false;
+	}
+
+	
 }
 
 

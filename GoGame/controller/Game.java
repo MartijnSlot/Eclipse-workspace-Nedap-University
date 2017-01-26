@@ -32,7 +32,8 @@ public class Game {
 		players[1] = s1;
 		currentPlayer = 0;
 	}
-	// -- Queries ----------------------------------------------------
+	
+	// -- QUERIES
 
 	/**
 	 * Returns the board.
@@ -52,13 +53,16 @@ public class Game {
 		return currentPlayer;
 	}
 
+	
+	// -- METHODS
+	
 	/**
 	 * As long as there is no winner, players keep playing turns
 	 * @param a
 	 */
 	public void play(Position a) {
 		updateTUI();
-		while (!board.isWinner(Stone.BLACK) || !board.isWinner(Stone.WHITE)) {
+		while (!hasWinner()) {
 			players[currentPlayer].makeMove(board, a);
 			writeHistory();
 			currentPlayer = (currentPlayer + 1) % numberPlayers;
@@ -70,7 +74,9 @@ public class Game {
 	 * As long as there is no winner, a players switches turns with a pass
 	 */
 	public void passMove() {
-		while (!board.isWinner(Stone.BLACK) || !board.isWinner(Stone.WHITE)) {
+		while (!hasWinner()) {
+			if (players[(currentPlayer + 1) % numberPlayers)].pass) //TODO
+			players[currentPlayer].passes();
 			currentPlayer = (currentPlayer + 1) % numberPlayers;
 		}
 
@@ -175,6 +181,10 @@ public class Game {
 		board.removePoint(pos);
 		return false;
 
+	}
+	
+	public boolean hasWinner() {
+		return (players[0].isWinner() | players[1].isWinner());
 	}
 
 	/**

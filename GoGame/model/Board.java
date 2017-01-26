@@ -247,16 +247,6 @@ public class Board {
 		return true;
 	}
 
-	/**
-	 * checks if player with stone s is the winner
-	 * @param s
-	 * @return boolean
-	 */
-	public boolean isWinner(Stone s) {
-		return false;
-	}
-
-
 	public String toSimpleString() {
 		String boardString = "";
 		for (int i = 1; i <= dim; i++) {

@@ -42,7 +42,7 @@ public class MiniServer extends Thread {
 					int row = Integer.parseInt(inputMessage[1]);
 					if (!server.moveAllowed(col, row)) {
 						server.annihilatePlayer();
-						//TODO notify players for this mofo being kicked
+						output.write("Player + client");
 					}
 					legalInput = true;
 					server.placeMove(col, row);
