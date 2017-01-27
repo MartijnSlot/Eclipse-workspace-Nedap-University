@@ -24,6 +24,7 @@ public class Game {
 	public Player[] players;
 	public int currentPlayer;
 	public Set<String> history = new HashSet<>();
+	boolean draw;
 
 	public Game(Player s0, Player s1, int dim) {
 		board = new Board(dim);
@@ -31,8 +32,9 @@ public class Game {
 		players[0] = s0;
 		players[1] = s1;
 		currentPlayer = 0;
+		draw = false;
 	}
-	
+
 	// -- QUERIES
 
 	/**
@@ -53,21 +55,19 @@ public class Game {
 		return currentPlayer;
 	}
 
-	
+
 	// -- METHODS
-	
+
 	/**
 	 * As long as there is no winner, players keep playing turns
 	 * @param a
 	 */
-	public void play(Position a) {
+	public void executeTurn(Position a) {
 		updateTUI();
-		while (!hasWinner()) {
-			players[currentPlayer].makeMove(board, a);
-			writeHistory();
-			currentPlayer = (currentPlayer + 1) % numberPlayers;
-			updateTUI();
-		}
+		players[currentPlayer].makeMove(board, a);
+		writeHistory();
+		currentPlayer = (currentPlayer + 1) % numberPlayers;
+		updateTUI();
 	}
 
 	/**
@@ -75,11 +75,31 @@ public class Game {
 	 */
 	public void passMove() {
 		while (!hasWinner()) {
-			if (players[(currentPlayer + 1) % numberPlayers)].pass) //TODO
-			players[currentPlayer].passes();
-			currentPlayer = (currentPlayer + 1) % numberPlayers;
+			if (!players[(currentPlayer + 1) % numberPlayers].pass) {
+				players[currentPlayer].passes();
+				currentPlayer = (currentPlayer + 1) % numberPlayers;
+			}
+			if (players[(currentPlayer + 1) % numberPlayers].pass && players[currentPlayer].pass) {
+				determineWinner();
+			}
 		}
 
+	}
+
+	private void determineWinner() {
+		if (board.countScore()[0] > board.countScore()[1]) {
+			for (int i = 1; i <= currentPlayer; i++) {
+				if (players[i].getStone() == Stone.BLACK) players[i].isWinner();
+			}
+		}
+		if (board.countScore()[1] > board.countScore()[0]) {
+			for (int i = 1; i <= currentPlayer; i++) {
+				if (players[i].getStone() == Stone.WHITE) players[i].isWinner();
+			}
+		}
+		if (board.countScore()[1] > board.countScore()[0]) {
+			draw = true;
+		}
 	}
 
 	/**
@@ -182,9 +202,36 @@ public class Game {
 		return false;
 
 	}
-	
+
 	public boolean hasWinner() {
-		return (players[0].isWinner() | players[1].isWinner());
+		return (players[0].winner | players[1].winner);
+	}
+	
+	private boolean playAgain() {
+		boolean inputSyntaxError = false;
+		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+
+		do {
+			System.out.println("Play again? (Y/N)");
+			try {
+				String playAgain = input.readLine();
+				if (playAgain.equals("Y") | playAgain.equals("y") | playAgain.equals("yes")) {
+					return true;
+				}
+				else if (playAgain.equals("N") | playAgain.equals("n") | playAgain.equals("no")) {
+					return true;
+				}
+				else {
+					System.out.println("Wrong input (Y/N)");
+					inputSyntaxError = true;
+				}
+			} catch (IOException e) {
+				System.out.println("Wrong input (Y/N)");
+				inputSyntaxError = true;
+			}
+		} while(inputSyntaxError);
+		
+		return false;
 	}
 
 	/**

@@ -1,127 +1,86 @@
 package server;
 
 import java.net.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import controller.Game;
-import model.Player;
-import model.Position;
-import model.Stone;
-
+import client.GoClient;
 import java.io.*;
 
-public class GoServer {
+public class GoServer extends Thread {
 
-	private MiniServer clients[] = new MiniServer[100];
-	private int numClients = 0;
+	private int port;
+	public Socket socket;
 	private ServerSocket serverSocket;
-	private Game game;
-
+	private Set<ClientHandler> clientHandlers = new HashSet<>();
+	private Map<String, Integer> clients = new HashMap<>();
+	private PrintWriter output;
+	private int maxClients = 50;
+	private int clientCheckerDelay = 1;
 
 	public GoServer(int port) {
+		System.out.println("Starting server on port " + port);
 		try {
-			serverSocket = new ServerSocket(port);
-			System.out.println("Server riding the waves of port " + port + ". Details: " + serverSocket);
-		} catch (IOException ioe) {
-			System.out.println("Wash out: server has sunk in port " + port + ": " + ioe.getMessage());
+			serverSocket = new ServerSocket(port, maxClients);
+		} catch (IOException e) {
+			System.out.print("Could not listen on port " + port);
 		}
-
+		System.out.println("Waiting for clients...");
 	}
 
-	private void go() throws IOException {
-		boolean listeningSocket = true;
-		while (listeningSocket) {
-			System.out.println("Waiting for a player.");
-			Socket clientSocket = serverSocket.accept();
-			System.out.println("Go player!");
-			MiniServer mini = new MiniServer(clientSocket);
-			mini.start();
+
+	@Override
+	public void run() {
+		listen();
+		new Thread(new Timer(this, clientCheckerDelay));
+	}
+
+	
+	public Map<String, Integer> getClients() {
+		return clients;
+	}
+
+	public void setClients(Map<String, Integer> clients) {
+		this.clients = clients;
+	}
+
+
+	/**
+	 * make new thread for each client that connects
+	 */
+	public void listen() {
+		while (true) {
+			try {
+				ClientHandler newClient = new ClientHandler(serverSocket.accept(), this);
+				clientHandlers.add(newClient);
+			} catch (IOException e) {
+				System.err.println("Cannot accept client.");
+			}
 		}
-		serverSocket.close();
 	}
 
-	private int findClient(int ID) {
-		return ID;
-	}
-
-	public void sendToAllPlayers(String string) {
-	}
-
-	public boolean moveAllowed(int col, int row) {
-		if (!game.getBoard().isAllowed(new Position(col, row))) {
-			System.out.println("\nField " + col + ", " + row + " is no valid position.");
-			return false;
-		} else if (game.inKo(new Position(col, row))) {
-			System.out.println("\nField " + col + ", " + row + " is in Ko. \n\nMaar wie is die Ko dan?");
-			return false;
-		} else {
-			return true;
-		}
-	}
-	public void placeMove(int col, int row) {
-		game.play(new Position(col, row));
-
-	}
-	public void pass() {
-		game.passMove();
-
-	}
-
-	public void tableflip() {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void waitForGame() {
-		// TODO Auto-generated method stub
-
-	}
-
-
-
-	public void annihilatePlayer() {
-		// TODO Auto-generated method stub
-
-	}
-
-	public boolean checkName(String name) {
-		if (name.length() > 20 | name.matches(".*\\W+.*")) {
-			System.out.println("Illegal input " + name +
-					", name requirements: \n- name < 20 characters \n- name may only consist out of digits and letters");
-			return false;
-		}
-		System.out.println("Your name is: " + name);
-		return true;
-	}
-
-	public void warning() {
-		//TODO sent warning to client
-		System.out.println("Must... resist... kicking...you. Invalid input.");
-
-	}
-
-	public boolean isParsable(String input){
-		boolean parsable = true;
-		try{
-			Integer.parseInt(input);
-		}catch(NumberFormatException e){
-			parsable = false;
-		}
-		return parsable;
-	}	
-
-	public static void main(String args[]) {
-		GoServer server = new GoServer(Integer.parseInt(args[0]));
+	public void removeClient(ClientHandler a) {
 		try {
-			server.go();
+			clientHandlers.remove(a);
+			socket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}	
+
+	public void sendMessageToAll(String msg) {
+		output.write(msg);
 
 	}
 
+	public void clientEntry(String name, int dim) {			
+		clients.put(name, dim);
+	}
 
-
-
-
+	public void handleWait() {
+			
+	}
 
 }

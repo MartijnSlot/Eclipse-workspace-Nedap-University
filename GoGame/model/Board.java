@@ -229,8 +229,6 @@ public class Board {
 	 * checks if the placement of a stone on pos is legal
 	 * stone is placed outside of the dimensions of the board
 	 * stone is placed on an occupied spot (black, white)
-	 * stone is placed while recreating any previous board position (ko rule)
-	 * TODO more conditions for illegal moves???
 	 * @param pos, s
 	 * @return boolean
 	 */
@@ -245,6 +243,29 @@ public class Board {
 			return false;
 		}
 		return true;
+	}
+	
+	
+	/**
+	 * counts the endscore on the board. int[0] = score Stone.BLACK and int[1] = score Stone.WHITE
+	 * @return int[]
+	 */
+	public int[] countScore() {
+		int blackScore = 0;
+		int whiteScore = 0;
+		int[] scores = new int[2];
+		for (Point p : points.values()) {
+			if (p.getStone() == Stone.BLACK) blackScore += 1;
+			if (p.getStone() == Stone.WHITE) whiteScore += 1;
+			if (p.getStone() == Stone.EMPTY) {
+				Map<Position, Point> temp = new HashMap<>();
+				
+			}
+		}
+		scores[0] = blackScore;
+		scores[1] = whiteScore;
+		return scores;
+		
 	}
 
 	public String toSimpleString() {
@@ -279,4 +300,5 @@ public class Board {
 		}
 		return s;
 	}
+
 }

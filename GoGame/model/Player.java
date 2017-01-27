@@ -1,9 +1,9 @@
 package model;
 
+import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
 
-import controller.Game;
 import controller.LocalGoGo;
 
 /**
@@ -17,11 +17,13 @@ public class Player {
 	public String name;
 	public Stone stone;
 	public boolean pass;
-
+	public boolean winner;
+	
 	public Player(String name, Stone stone) {
 		this.name = name;
 		this.stone = stone;
 		this.pass = false;
+		this.winner = false;
 	}
 	
 	// -- QUERIES
@@ -40,12 +42,11 @@ public class Player {
 	public void makeMove(Board board, Position pos) {
 		board.setPoint(pos, this.getStone());	
 		board.autoRemove(pos);
+		pass = false;
 	}
 	
 	public void passes() {
-		if (this.getStone() == Stone.WHITE && otherplayer.pass = true) { //TODO
-//			end game
-		}
+		this.pass = true;
 	}
 
 	public void guiMove(Position pos) {
@@ -77,9 +78,8 @@ public class Player {
 		}
 	}
 	
-	public boolean isWinner() {
-		if (this)		
-		return false;
+	public void isWinner() {
+		this.winner = true;
 	}
 
 	
