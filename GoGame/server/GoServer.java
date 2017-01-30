@@ -1,25 +1,30 @@
 package server;
 
 import java.net.*;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import client.GoClient;
+import server.ClientHandler.ClientStatus;
+
 import java.io.*;
 
-public class GoServer extends Thread {
+public class GoServer {
 
+	@SuppressWarnings("unused")
 	private int port;
 	public Socket socket;
 	private ServerSocket serverSocket;
-	private Set<ClientHandler> clientHandlers = new HashSet<>();
-	private Map<String, Integer> clients = new HashMap<>();
+	private Map<Integer, ClientHandler> clientHandlerMap = new HashMap<>();
+	private Map<Integer, List<Integer>> pendingClients = new HashMap<>();
 	private PrintWriter output;
 	private int maxClients = 50;
-	private int clientCheckerDelay = 1;
 
+	public static void main(String args[]) {
+		GoServer server = new GoServer(Integer.parseInt(args[0]));
+	}
+	
 	public GoServer(int port) {
 		System.out.println("Starting server on port " + port);
 		try {
@@ -28,42 +33,29 @@ public class GoServer extends Thread {
 			System.out.print("Could not listen on port " + port);
 		}
 		System.out.println("Waiting for clients...");
-	}
 
-
-	@Override
-	public void run() {
-		listen();
-		new Thread(new Timer(this, clientCheckerDelay));
-	}
-
-	
-	public Map<String, Integer> getClients() {
-		return clients;
-	}
-
-	public void setClients(Map<String, Integer> clients) {
-		this.clients = clients;
-	}
-
-
-	/**
-	 * make new thread for each client that connects
-	 */
-	public void listen() {
 		while (true) {
 			try {
 				ClientHandler newClient = new ClientHandler(serverSocket.accept(), this);
-				clientHandlers.add(newClient);
+
+				int clientID = (clientHandlerMap.size() + 1);
+				clientHandlerMap.put(clientID, newClient);
+				clientEntry(newClient, clientID);
+				newClient.start();
 			} catch (IOException e) {
 				System.err.println("Cannot accept client.");
 			}
 		}
 	}
 
+
+	public Map<Integer, ClientHandler> getClientHandlerMap() {
+		return clientHandlerMap;
+	}
+
 	public void removeClient(ClientHandler a) {
 		try {
-			clientHandlers.remove(a);
+			clientHandlerMap.remove(a);
 			socket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -72,15 +64,32 @@ public class GoServer extends Thread {
 
 	public void sendMessageToAll(String msg) {
 		output.write(msg);
+	}
+
+	public void startNewGame(int ID, int ID2, int dim) {
+		clientHandlerMap.get(ID).setClientStatus(ClientStatus.INGAME);
+		clientHandlerMap.get(ID).setClientStatus(ClientStatus.INGAME);
+		new SingleGameServer(clientHandlerMap.get(ID), clientHandlerMap.get(ID), dim);
 
 	}
 
-	public void clientEntry(String name, int dim) {			
-		clients.put(name, dim);
-	}
+	public void clientEntry(ClientHandler newClient, int clientID) {			
+		List<Integer> clientIDs = new ArrayList<>();
+		clientIDs.add(clientID);
 
-	public void handleWait() {
-			
-	}
+		if(newClient.getClientStatus() == ClientStatus.INITIALIZING) {
+			if (pendingClients.containsKey(newClient.getDim())) {
+				pendingClients.get(newClient.getDim()).addAll(clientIDs);
+			} else {
+				pendingClients.put(newClient.getDim(), clientIDs);;
+			}
+			newClient.setClientStatus(ClientStatus.WAITING);
+		}
 
+		for (int dim : pendingClients.keySet()) {
+			if (pendingClients.get(dim).size() == 2) {
+				startNewGame(pendingClients.get(dim).get(0), pendingClients.get(dim).get(1), dim);
+			}
+		}
+	}
 }

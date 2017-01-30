@@ -247,27 +247,33 @@ public class Board {
 	
 	
 	/**
-	 * counts the endscore on the board. int[0] = score Stone.BLACK and int[1] = score Stone.WHITE
+	 * counts the endscore on the board. 
+	 * int[0] = score Stone.BLACK 
+	 * int[1] = score Stone.WHITE
 	 * @return int[]
 	 */
 	public int[] countScore() {
 		int blackScore = 0;
 		int whiteScore = 0;
 		int[] scores = new int[2];
-		for (Point p : points.values()) {
-			if (p.getStone() == Stone.BLACK) blackScore += 1;
-			if (p.getStone() == Stone.WHITE) whiteScore += 1;
-			if (p.getStone() == Stone.EMPTY) {
-				Map<Position, Point> temp = new HashMap<>();
-				
+		for (Position p : points.keySet()) {
+			if (points.get(p).getStone() == Stone.BLACK) blackScore += 1;
+			else if (points.get(p).getStone() == Stone.WHITE) whiteScore += 1;
+			else {
+				Set<Position> a = freePositions(defendingCluster(p));
 			}
 		}
+
 		scores[0] = blackScore;
 		scores[1] = whiteScore;
 		return scores;
 		
 	}
 
+	/**
+	 * prints a string that used for creating board history
+	 * @return String
+	 */
 	public String toSimpleString() {
 		String boardString = "";
 		for (int i = 1; i <= dim; i++) {

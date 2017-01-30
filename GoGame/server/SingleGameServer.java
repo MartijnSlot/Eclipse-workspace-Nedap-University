@@ -3,13 +3,16 @@ package server;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Random;
 
 import client.GoClient;
 import controller.Game;
 import exceptions.*;
+import model.Player;
 import model.Position;
+import model.Stone;
 
-public class SingleGameServer extends Thread {
+public class SingleGameServer {
 
 	private GoServer server;
 	private ServerSocket serverSocket;
@@ -21,19 +24,19 @@ public class SingleGameServer extends Thread {
 	private Game game;
 
 
-	public SingleGameServer(ClientHandler a, ClientHandler b) {
-		super("SingleGameServer");
+	public SingleGameServer(ClientHandler a, ClientHandler b, int dim) {
 		this.client1 = a;
 		this.client2 = b;
-	}
-
-	public void run() {
-		String inputMessage[] = null;
-		String message;
-		boolean legalInput = false;
-		String chatMessage = null;
-
 		
+		String playerNames[] = new String[2];
+		playerNames[0] = client1.getClientName();
+		playerNames[1] = client2.getClientName();
+		Random rand = new Random();
+		int  n = rand.nextInt(1);
+		Game game = new Game(new Player(playerNames[n], Stone.BLACK), new Player(playerNames[1-n], Stone.WHITE), dim);
+		while(!game.hasWinner()){
+			client1.handleGame();
+		}
 	}
 
 	public boolean moveAllowed(int col, int row) {
@@ -87,7 +90,7 @@ public class SingleGameServer extends Thread {
 
 	}
 
-	public boolean isParsable(String input){
+	public boolean checkDim(String input){
 		boolean parsable = true;
 		try{
 			Integer.parseInt(input);
@@ -95,5 +98,10 @@ public class SingleGameServer extends Thread {
 			parsable = false;
 		}
 		return parsable;
+	}
+
+	public void handleWait() {
+		// TODO Auto-generated method stub
+		
 	}	
 }
