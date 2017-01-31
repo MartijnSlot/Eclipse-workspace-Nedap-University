@@ -1,6 +1,5 @@
 package model;
 
-import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,22 +40,11 @@ public class Player {
 
 	public void makeMove(Board board, Position pos) {
 		board.setPoint(pos, this.getStone());	
-		board.autoRemove(pos);
 		pass = false;
 	}
 	
 	public void passes() {
 		this.pass = true;
-	}
-
-	public void guiMove(Position pos) {
-		boolean white = false;
-		if (this.getStone() == Stone.WHITE) {
-			white = true ;
-		} else {
-			white = false;
-		}
-		LocalGoGo.gogui.addStone(pos.y - 1, pos.x - 1, white);
 	}
 
 	public void guiAutoRemove(Board board, Position pos) {

@@ -1,161 +1,223 @@
 package server;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import client.GoClient;
-import model.Stone;
-import server.ClientHandler.ClientStatus;
 
 public class ClientHandler extends Thread {
 	private GoServer server;
 	private SingleGameServer sgs;
 	private GoClient client;
 	private Socket socket;
-	private PrintWriter output;
-	private BufferedReader input;
+	private BufferedWriter outputToClient;
+	private BufferedReader inputFromClient;
 	private ClientStatus clientStatus;
-	private String clientName;
+	private int clientID;
 	private int dim;
+	private String clientName;
 
-	public ClientHandler(Socket socket, GoServer server) {
-		this.client = client;
+	public ClientHandler(Socket socket, GoServer server, int clientID) {
 		this.server = server;
 		this.socket = socket;
-		this.clientName = null;
-		this.dim = 0;
+		this.clientID = clientID;
 		this.clientStatus = ClientStatus.INITIALIZING;
-	}
-
-	public String getClientName() {
-		return clientName;
 	}
 
 	@Override
 	public void run() {
 		try {
-			input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			output = new PrintWriter(socket.getOutputStream());
-			while(true){
+			inputFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			outputToClient = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+			while(socket.isConnected()){
 				switch (clientStatus) {
 				case INITIALIZING:
-					handleEntry();
-					output.write(("ClientStatus:" + clientStatus));
+					assessInput(inputFromClient);
+					outputToClient.write("CHAT ClientStatus:" + clientStatus);
+					outputToClient.newLine();
+					outputToClient.flush();
 				case WAITING:
-//					handleWaiting();
-					output.write(("ClientStatus:" + clientStatus));
+					outputToClient.write("CHAT ClientStatus:" + clientStatus);
+					outputToClient.newLine();
+					outputToClient.flush();
 				case INGAME:
 					handleGame();
-					clientStatus = ClientStatus.INITIALIZING;
-					output.write(("ClientStatus:" + clientStatus));
+					outputToClient.write("CHAT ClientStatus:" + clientStatus);
+					outputToClient.newLine();
+					outputToClient.flush();
 				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		} 
 
-		try {
-			input.close();
-			output.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} finally {
+			try {
+				inputFromClient.close();
+				outputToClient.close();
+				server.removeClient(this);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
-		server.removeClient(this);
 	}
 
-	public Integer getDim() {
-		return dim;
-	}
-	
+
 	public void setClientStatus(ClientStatus cs) {
 		this.clientStatus = cs;
-		
+
 	}
 
 	public ClientStatus getClientStatus() {
 		return clientStatus;
 	}
 
-	private void handleEntry() throws IOException {
-		boolean inputSyntaxError = false;
-		do {
-			System.out.println("Please enter {GO yourname boarddim}");
-			String message = input.readLine();
-			while(input != null){
-				String inputMessage[] = message.split(" ");
-				if (message.startsWith("GO") && inputMessage.length == 3 && checkName(inputMessage[1]) && checkDim(inputMessage[2])) {
-					clientName = inputMessage[1];
-					dim = Integer.parseInt(inputMessage[2]);
-				}
-				if (message.startsWith("GO") && inputMessage.length == 2 && checkDim(inputMessage[1])) {
-					dim = Integer.parseInt(inputMessage[2]);
-				}
-				else {
-					output.write("WARNING Must...resist...kicking...you. \n Message " + message + " is invalid input.");
-					inputSyntaxError = true;
-				}
-			} 
-		} while(inputSyntaxError);
+	public String getClientName() {
+		return clientName;
 	}
 
-	public void handleWaiting() throws IOException {
-//		server.handleWait();
+	public int getClientID() {
+		return clientID;
+	}
 
-		//		String message = input.readLine();
-		//		if (message.startsWith("CHAT")) {
-		//			server.sendMessage(message);
-		//		}
+	public void setClientID(int id) {
+		clientID = id;
+	}
 
+	public int getDim() {
+		return dim;
+	}
+
+	public void setDim(int d) {
+		dim = d;
+	}
+
+	public void assessInput(BufferedReader input) throws IOException {
+		String message = input.readLine();
+		String inputMessage[] = message.split(" ");
+
+		if (message.startsWith("GO") && inputMessage.length == 3 && checkName(inputMessage[1]) && checkDim(inputMessage[2])) {
+			dim = Integer.parseInt(inputMessage[2]);
+			clientName = inputMessage[1];
+			clientEntry(this, clientID);
+			outputToClient.write("Input correct:" + message);
+			outputToClient.flush();
+		} else if (message.startsWith("GO") && inputMessage.length == 2 && checkDim(inputMessage[1])) {
+			dim = Integer.parseInt(inputMessage[1]);
+			clientEntry(this, clientID);
+			outputToClient.write("Input correct:" + message);
+			outputToClient.flush();
+		}
+		else {
+			outputToClient.write("WARNING Must...resist...kicking...you. \n Message " + message + " is invalid input. \n"
+					+ "Please enter *GO name dim* or *GO dim*: \n" + clientStatus);
+			outputToClient.newLine();
+			outputToClient.flush();
+		}
+	}
+
+	public void clientEntry(ClientHandler newClient, int clientID) throws IOException {			
+		ArrayList<Integer> clientIDs = new ArrayList<>();
+		clientIDs.add(clientID);
+		server.pendingClients.put(5, clientIDs);
+		server.clientHandlerMap.put(clientID, newClient);	
+
+		if(newClient.getClientStatus() == ClientStatus.INITIALIZING) {
+			if (server.pendingClients.containsKey(newClient.getDim())) {
+				server.pendingClients.get(newClient.getDim()).addAll(clientIDs);
+			} else {
+				server.pendingClients.put(newClient.getDim(), clientIDs);;
+			}
+			newClient.setClientStatus(ClientStatus.WAITING);
+			outputToClient.write("WAITING");
+			outputToClient.newLine();
+			outputToClient.flush();
+		}
+
+		for (int dim : server.pendingClients.keySet()) {
+			if (server.pendingClients.get(dim).size() == 2) {
+				startNewGame(server.pendingClients.get(dim).get(0), server.pendingClients.get(dim).get(1), dim);
+				server.pendingClients.get(dim).clear();
+			}
+		}
+	}
+
+	public void startNewGame(int ID, int ID2, int dim) {
+		server.clientHandlerMap.get(ID).setClientStatus(ClientStatus.INGAME);
+		server.clientHandlerMap.get(ID2).setClientStatus(ClientStatus.INGAME);
+		new SingleGameServer(server.clientHandlerMap.get(ID), server.clientHandlerMap.get(ID2), dim);
+
+	}
+
+	public void annihilatePlayer(GoClient client, int clientID) throws IOException {
+		sgs.directWinner();
+		outputToClient.write("You've been caught cheating, therefore you shall be annihilated!");
+		server.pendingClients.get(this.getDim()).remove(clientID);
+		outputToClient.close();
+		inputFromClient.close();
+		server.socket.close();
 	}
 
 	void handleGame(){
 		String inputMessage[] = null;
 		String message;
-		boolean legalInput = false;
+		boolean inputError = false;
 
 		try {
-			System.out.println("State your action (MOVE int int\n, PASS, TABLEFLIP, CHAT)");
-			message = input.readLine();
+			outputToClient.write("CHAT State your action (MOVE int int, PASS, TABLEFLIP, CHAT, EXIT)");
+			outputToClient.newLine();
+			outputToClient.flush();
+			message = inputFromClient.readLine();
 			System.out.println(inputMessage);
 			inputMessage = message.split(" ");
-			while(!legalInput){
+			do {
 
-				if (inputMessage[0] == "MOVE" && isParsable(inputMessage[1]) && isParsable(inputMessage[2])) {
+				if (inputMessage[0] == "MOVE" && isParsable(inputMessage[1]) && isParsable(inputMessage[2]) && inputMessage.length == 3) {
 					int col = Integer.parseInt(inputMessage[2]);
 					int row = Integer.parseInt(inputMessage[1]);
 					if (!sgs.moveAllowed(col, row)) {
-						sgs.annihilatePlayer();
-						output.write("Player + client destroyed");
+						annihilatePlayer(client, clientID);
 					}
-					legalInput = true;
 					sgs.executeTurnMove(col, row);
-				} else if (inputMessage[0] == "PASS" && inputMessage.length == 1) {
-					legalInput = true;
+				} else if (message.startsWith("PASS") && inputMessage.length == 1) {
 					sgs.executeTurnPass();
-				} else if (inputMessage[0] == "TABLEFLIP" && inputMessage.length == 1) {
-					legalInput = true;
+				} else if (message.startsWith("TABLEFLIP") && inputMessage.length == 1) {
 					sgs.executeTurnTableflip();
-				} else if (inputMessage[0] == "CHAT") {
-					legalInput = true;
-					output.print(clientName + ": " + message);
-					System.out.println(clientName + ": " + message);
+					outputToClient.write("TABLEFLIPPED" + message);
+					outputToClient.newLine();
+					outputToClient.flush();
+					playAgain();
+				} else if (message.startsWith("CHAT")) {
+					outputToClient.write(client.getClientName() + ": " + message);
+					outputToClient.newLine();
+					outputToClient.flush();
 				} else {
-					output.write("WARNING Must...resist...kicking...you. Message " + message + " is invalid input.");
+					outputToClient.write("WARNING Must...resist...kicking...you. Message " + message + " is invalid input.");
+					outputToClient.flush();
+					inputError = false;
 				}
-			}
+			} while(inputError);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
+	public boolean isParsable(String input) {
+		try{
+			Integer.parseInt(input);
+		} catch (NumberFormatException e){
+			return false;
+		}
+		return true;
+	}
+
 	public boolean checkName(String name) {
 		if (name.length() > 20 | name.matches(".*\\W+.*")) {
-			System.out.println("Illegal input " + name +
+			System.out.println("CHAT Server: Illegal input " + name +
 					", name requirements: \n- name < 20 characters \n- name may only consist out of digits and letters");
 			return false;
 		}
@@ -167,7 +229,7 @@ public class ClientHandler extends Thread {
 		boolean dimIsOk = true;
 		try{
 			int parsedInput = Integer.parseInt(input);
-			if (parsedInput < 5 | parsedInput > 131 && parsedInput % 2 == 0) {
+			if (parsedInput < 5 || parsedInput > 131 && parsedInput % 2 == 0) {
 				dimIsOk = false;
 			}
 		}catch(NumberFormatException e){
@@ -176,13 +238,41 @@ public class ClientHandler extends Thread {
 		return dimIsOk;
 	}
 
-	public boolean isParsable(String input) {
-		try{
-			Integer.parseInt(input);
-		} catch (NumberFormatException e){
-			return false;
-		}
-		return true;
+	private boolean playAgain() throws IOException {
+		boolean inputError = false;
+		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+
+		do {
+			outputToClient.write("CHAT Play again? (Y/N)");
+			outputToClient.newLine();
+			outputToClient.flush();
+			try {
+				String playAgain = input.readLine();
+				if (playAgain.equals("Y") | playAgain.equals("y") | playAgain.equals("yes")) {
+					clientStatus = ClientStatus.INITIALIZING;
+					return true;
+				}
+				else if (playAgain.equals("N") | playAgain.equals("n") | playAgain.equals("no")) {
+					socket.close();
+					inputFromClient.close();
+					outputToClient.close();
+					return false;
+				}
+				else {
+					outputToClient.write("CHAT Wrond input (Y/N)");
+					outputToClient.newLine();
+					outputToClient.flush();
+					inputError = true;
+				}
+			} catch (IOException e) {
+				outputToClient.write("CHAT Wrond input (Y/N)");
+				outputToClient.newLine();
+				outputToClient.flush();
+				inputError = true;
+			}
+		} while(inputError);
+
+		return false;
 	}
 
 	public enum ClientStatus {

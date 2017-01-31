@@ -200,30 +200,6 @@ public class Board {
 		return libertyPositions(pos).size();
 	}
 
-	/**
-	 * replace the defending cluster stones (black, white) with EMPTY
-	 * 
-	 * @param pos
-	 */
-	public void autoRemove(Position pos) {
-		Set<Position> a = new HashSet<>();
-		a.add(new Position(pos.x - 1, pos.y));
-		a.add(new Position(pos.x + 1, pos.y));
-		a.add(new Position(pos.x, pos.y - 1));
-		a.add(new Position(pos.x, pos.y + 1));
-		for (Position p : a) {
-			if (isPoint(p) && !isEmptyPoint(p) && numberOfLiberties(p) == 0) {	
-				for (Position q : defendingCluster(p)) {
-					setPoint(q, Stone.EMPTY);
-				}
-			}
-		}
-		if (!isEmptyPoint(pos) && numberOfLiberties(pos) == 0) {	
-			for (Position r : defendingCluster(pos)) {
-				setPoint(r, Stone.EMPTY);
-			}
-		}
-	}
 
 	/**
 	 * checks if the placement of a stone on pos is legal
@@ -232,13 +208,13 @@ public class Board {
 	 * @param pos, s
 	 * @return boolean
 	 */
-	public boolean isAllowed(Position pos) {
+	public boolean isAllowed(int row, int col) {
 
-		if (!isPoint(pos)) {
+		if (!isPoint(new Position(row, col))) {
 			System.out.println("Move not allowed: position does not exist on this playing board.");
 			return false;
 		}
-		if (!isEmptyPoint(pos)) {
+		if (!isEmptyPoint(new Position(row, col))) {
 			System.out.println("Move not allowed: position occupied.");
 			return false;
 		}
@@ -260,7 +236,8 @@ public class Board {
 			if (points.get(p).getStone() == Stone.BLACK) blackScore += 1;
 			else if (points.get(p).getStone() == Stone.WHITE) whiteScore += 1;
 			else {
-				Set<Position> a = freePositions(defendingCluster(p));
+				Set<Position> a = freePositions(defendingCluster(p)); 
+				//TODO
 			}
 		}
 
