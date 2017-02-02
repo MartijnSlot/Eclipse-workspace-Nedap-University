@@ -1,54 +1,68 @@
 package server;
 
-import java.util.Random;
+import java.io.IOException;
+
 import controller.Game;
+import server.ClientHandler.ClientStatus;
 
 
 public class SingleGameServer {
 
-	private ClientHandler ch1;
-	private ClientHandler ch2;
+	private ClientHandler[] chs;
 	private Game game;
+	private int currentClient;
 
+	public SingleGameServer(ClientHandler a, ClientHandler b, int dim) throws IOException {
+		this.chs[0] = a;
+		this.chs[1] = b;
 
-	public SingleGameServer(ClientHandler a, ClientHandler b, int dim) {
-		this.ch1 = a;
-		this.ch2 = b;
-		
 		String playerNames[] = new String[2];
-		playerNames[0] = ch1.getClientName();
-		playerNames[1] = ch2.getClientName();
-		Random rand = new Random();
-		int  n = rand.nextInt(1);
-		Game game = new Game(playerNames[n], playerNames[1-n], dim);
-		while(!game.hasWinner()){
-			ch1.handleGame();
+		playerNames[0] = a.getClientName();
+		playerNames[1] = b.getClientName();
+		game = new Game(playerNames[0], playerNames[1], dim);
+
+		chs[0].setClientStatus(ClientStatus.INGAME);
+		chs[1].setClientStatus(ClientStatus.WAITING);
+
+		String opponent1 = chs[1].getName();
+		String color1 = "black";
+		chs[0].sendReady(color1, opponent1, dim);
+
+		String opponent2 = chs[0].getName();
+		String color2 = "black";
+		chs[1].sendReady(color2, opponent2, dim);
+
+	}
+
+	public int getCurrentClient() {
+		return currentClient;
+	}
+
+	public void setCurrentClient(int a) {
+		this.currentClient = a;
+	}
+
+	public void executeTurnMove(int col, int row) throws IOException {
+		if (game.getBoard().isAllowed(row, col)) {
+			game.executeTurn(col, row);
+			setCurrentClient(game.currentPlayer);
+			chs[(currentClient + 1) % 2].writeToClient("MOVE: ");
+			chs[currentClient].setClientStatus(ClientStatus.WAITING);
+			chs[(currentClient + 1) % 2].setClientStatus(ClientStatus.INGAME);
 		}
 	}
 
-	public boolean moveAllowed(int col, int row) {
-		if (!game.getBoard().isAllowed(col, row)) {
-			System.out.println("\nField " + col + ", " + row + " is no valid position.");
-			return false;
-		} else if (game.inKo(col, row)) {
-			System.out.println("\nField " + col + ", " + row + " is in Ko. \n\nMaar wie is die Ko dan?");
-			return false;
-		} else {
-			return true;
-		}
-	}
-	public void executeTurnMove(int col, int row) {
-		game.executeTurn(col, row);
-
-	}
-	public void executeTurnPass() {
+	public void executeTurnPass() throws IOException {
 		game.passMove();
-
+		setCurrentClient(game.currentPlayer);
+		chs[(currentClient + 1) % 2].writeToClient("PASSED");
+		chs[currentClient].setClientStatus(ClientStatus.WAITING);
+		chs[(currentClient + 1) % 2].setClientStatus(ClientStatus.INGAME);
 	}
 
-	public void executeTurnTableflip() {
+	public void executeTurnTableflip() throws IOException {
 		game.tableflipMove();
-
+		chs[(currentClient + 1) % 2].writeToClient("TABLEFLIPPED");
 	}
 
 
@@ -72,8 +86,12 @@ public class SingleGameServer {
 		return parsable;
 	}
 
-	public void directWinner() {
-		game.players[game.currentPlayer].winner = true;
+	public void otherPlayerWins() throws IOException {
+		chs[(currentClient + 1) % 2].writeToClient("END");
 	}
-	
+
+	public synchronized void chatToOtherPlayer(String message) throws IOException {
+		chs[(currentClient + 1) % 2].writeToClient(message);
+	}
+
 }
