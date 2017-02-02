@@ -3,6 +3,13 @@ package client;
 import java.io.*;
 import java.net.*;
 
+/**
+ * Class for creating a GO client.
+ * 
+ * @author Martijn Slot
+ * @version 1.0
+ */
+
 public class GoClient extends Thread {
 
 
@@ -32,10 +39,18 @@ public class GoClient extends Thread {
 			}
 	}
 
+	/**
+	 * getter for the socket
+	 * @return socket
+	 */
 	public Socket getSocket() {
 		return socket;
 	}
 
+	/**
+	 * handles the input from the server.
+	 * @throws IOException
+	 */
 	public void handleInput() throws IOException {
 		System.out.println("Please enter {GO yourname boarddim}");	
 		do {
@@ -49,7 +64,7 @@ public class GoClient extends Thread {
 				} else if (message.startsWith("MOVE") && isParsable(inputMessage[1]) && isParsable(inputMessage[2])) {
 					serverHandler.move(inputMessage[0], inputMessage[1], inputMessage[2]);
 				} else if (message.startsWith("PASS") && inputMessage.length == 1 && serverHandler.getClientName() != null) {
-					serverHandler.pass(inputMessage[1]);
+					serverHandler.pass(inputMessage[0]);
 				} else if (message.startsWith("TABLEFLIP") && inputMessage.length == 1 && serverHandler.getClientName()  != null) {
 					serverHandler.tableflip(message);
 				} else if (message.startsWith("CHAT")) {
@@ -67,7 +82,11 @@ public class GoClient extends Thread {
 		} while(true);
 	}
 
-
+	/**
+	 * checks whether a string input can be parsed to Integer
+	 * @param input
+	 * @return boolean
+	 */
 	public boolean isParsable(String input) {
 		try{
 			Integer.parseInt(input);
@@ -76,7 +95,12 @@ public class GoClient extends Thread {
 		}
 		return true;
 	}
-
+	
+	/**
+	 * checks whether the inputname is correct
+	 * @param name
+	 * @return boolean
+	 */
 	public boolean checkName(String name) {
 		if (name.length() > 20 | name.matches(".*\\W+.*")) {
 			System.out.println("Illegal input " + name +
@@ -87,6 +111,11 @@ public class GoClient extends Thread {
 		return true;
 	}
 
+	/**
+	 * checks whether the given dimension is parsable and correct
+	 * @param input
+	 * @return boolean
+	 */
 	public boolean checkDim(String input){
 		int parsedInput;
 		if (!isParsable(input)) {
@@ -101,6 +130,10 @@ public class GoClient extends Thread {
 		return true;
 	}
 
+	/**
+	 * shuts down the client.
+	 * @throws IOException
+	 */
 	public void shutdown() throws IOException {
 		inputFromPlayer.close();
 		socket.close();

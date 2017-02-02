@@ -1,7 +1,7 @@
 package model;
 
 /**
- * Represents a Stone in a GO game. There three possible values:
+ * Represents a Stone in a GO game. Three possible values:
  * Stone.BLACK, Stone.WHITE and Stone.EMPTY.
  * 
  * @author Martijn Slot

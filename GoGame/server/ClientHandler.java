@@ -7,6 +7,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
+/**
+ * Class for creating a ClientHandler.
+ * handles all communication between server and ServerHandler
+ * 
+ * @author Martijn Slot
+ * @version 1.0
+ */
+
 public class ClientHandler extends Thread {
 	private GoServer server;
 	private SingleGameServer sgs;
@@ -14,11 +22,14 @@ public class ClientHandler extends Thread {
 	private BufferedWriter outputToClient;
 	private BufferedReader inputFromClient;
 	private ClientStatus clientStatus;
-	private int clientID;
 	private int dim;
 	private String clientName;
-	private boolean turn;
 
+	/**
+	 * threaded clienthandler constructor
+	 * @param socket
+	 * @param server
+	 */
 	public ClientHandler(Socket socket, GoServer server) {
 		this.server = server;
 		this.socket = socket;
@@ -32,6 +43,9 @@ public class ClientHandler extends Thread {
 
 	}
 
+	/**
+	 * pre game run-function for clientStatuses PREGAME and WAITING
+	 */
 	@Override
 	public void run() {
 		try {
@@ -47,63 +61,73 @@ public class ClientHandler extends Thread {
 					outputToClient.write("CHAT ClientStatus:" + clientStatus);
 					outputToClient.newLine();
 					outputToClient.flush();
-				case INGAME:
-					gameInput();
-					outputToClient.write("CHAT ClientStatus:" + clientStatus);
-					outputToClient.newLine();
-					outputToClient.flush();
+				default:
+					break;
 				}
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-
-		} 			
-
-		try {
-			inputFromClient.close();
-			outputToClient.close();
-			server.removeClient(this);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
+	/**
+	 * setter for clientStatus
+	 * @param cs
+	 */
+	public void setClientStatus(ClientStatus cs) {
+		this.clientStatus = cs;
+
+	}
+
+	/**
+	 * getter for clientStatus
+	 * @return ClientStatus
+	 */
+	public ClientStatus getClientStatus() {
+		return clientStatus;
+	}
+
+	/**
+	 * getter for clientName
+	 * @return String
+	 */
+	public String getClientName() {
+		return clientName;
+	}
+
+	/**
+	 * getter for the board dimension
+	 * @return int
+	 */
+	public int getDim() {
+		return dim;
+	}
+
+	/**
+	 * setter for the board dimension
+	 * @param d
+	 */
+	public void setDim(int d) {
+		dim = d;
+	}
+	
+	/**
+	 * sends out the READY message with the pre-determined parameters.
+	 * @param color
+	 * @param opponent
+	 * @param boardSize
+	 * @throws IOException
+	 */
 	public synchronized void sendReady(String color, String opponent, int boardSize) throws IOException {
 		outputToClient.write("READY " + color + " " + opponent + " " + boardSize);
 		outputToClient.newLine();
 		outputToClient.flush();
 	}
 
-
-	public void setClientStatus(ClientStatus cs) {
-		this.clientStatus = cs;
-
-	}
-
-	public ClientStatus getClientStatus() {
-		return clientStatus;
-	}
-
-	public String getClientName() {
-		return clientName;
-	}
-
-	public int getClientID() {
-		return clientID;
-	}
-
-	public void setClientID(int id) {
-		clientID = id;
-	}
-
-	public int getDim() {
-		return dim;
-	}
-
-	public void setDim(int d) {
-		dim = d;
-	}
-
+	/**
+	 * Possible inputs from the client with the status PREGAME and the following actions
+	 * @throws IOException
+	 */
 	public void preGameInput() throws IOException {
 
 		String message = inputFromClient.readLine();
@@ -114,12 +138,15 @@ public class ClientHandler extends Thread {
 				clientName = inputMessage[1];
 				server.clientEntry(this, dim);
 				writeToClient("Input correct: " + message);
+				break;
 			} else if (message.startsWith("GO") && inputMessage.length == 2 && checkDim(inputMessage[1])) {
 				dim = Integer.parseInt(inputMessage[1]);
 				server.clientEntry(this, dim);
 				writeToClient("Input correct: " + message);
+				break;
 			} else if (message.startsWith("CHAT")) {
 				server.chatToAllPlayers(clientName + message);
+				break;
 			} else if (message.startsWith("EXIT") && inputMessage.length == 1) {	
 				try {
 					this.join();
@@ -134,17 +161,24 @@ public class ClientHandler extends Thread {
 						+ "Please enter *GO name dim* or *GO dim*: \n" + clientStatus);
 				outputToClient.newLine();
 				outputToClient.flush();
+				break;
 			}
 		}
 	}
 
+	/**
+	 * Possible inputs from the client with the status WAITING and the following actions
+	 * @throws IOException
+	 */
 	public void waitingInput() throws IOException {
 		String message = inputFromClient.readLine();
 		
 		while(message != null && clientStatus == ClientStatus.WAITING) {	
 			String inputMessage[] = message.split(" ");
 			if (message.startsWith("CHAT")) {
-				server.chatToAllPlayers(clientName + message);
+				System.out.println(message);
+				break;
+//				server.chatToAllPlayers(clientName + message);
 			} else if (message.startsWith("EXIT") && inputMessage.length == 1) {	
 				try {
 					this.join();
@@ -166,10 +200,14 @@ public class ClientHandler extends Thread {
 		}
 	}
 
+	/**
+	 * Possible inputs from the client with the status INGAME and the following actions
+	 * @throws IOException
+	 */
 	public void gameInput() throws IOException{
 		String message = inputFromClient.readLine();
 
-		while(message != null && clientStatus == ClientStatus.WAITING) {	
+		while(message != null && clientStatus == ClientStatus.INGAME) {	
 			String inputMessage[] = message.split(" ");
 
 			if (message.startsWith("MOVE") && isParsable(inputMessage[1]) && isParsable(inputMessage[2]) && inputMessage.length == 3) {
@@ -199,13 +237,15 @@ public class ClientHandler extends Thread {
 				outputToClient.flush();
 			}
 			if (clientStatus == ClientStatus.PREGAME) {
-				break;
 			}
 		}
 	}
 
-
-
+	/**
+	 * kicks a player from the server for making an illegal move
+	 * @param clientID
+	 * @throws IOException
+	 */
 	public void annihilatePlayer(int clientID) throws IOException {
 		sgs.otherPlayerWins();
 		outputToClient.write("You've been caught cheating, therefore you shall be annihilated!");
@@ -215,6 +255,11 @@ public class ClientHandler extends Thread {
 		server.socket.close();
 	}
 
+	/**
+	 * checks whether a string input can be parsed to Integer
+	 * @param input
+	 * @return boolean
+	 */
 	public boolean isParsable(String input) {
 		try{
 			Integer.parseInt(input);
@@ -224,6 +269,11 @@ public class ClientHandler extends Thread {
 		return true;
 	}
 
+	/**
+	 * checks whether the inputname is correct
+	 * @param name
+	 * @return boolean
+	 */
 	public boolean checkName(String name) {
 		if (name.length() > 20 | name.matches(".*\\W+.*")) {
 			System.out.println("CHAT Server: Illegal input " + name +
@@ -234,6 +284,11 @@ public class ClientHandler extends Thread {
 		return true;
 	}
 
+	/**
+	 * checks whether the given dimension is parsable and correct
+	 * @param input
+	 * @return boolean
+	 */
 	public boolean checkDim(String input){
 		boolean dimIsOk = true;
 		int parsedInput;
@@ -248,6 +303,11 @@ public class ClientHandler extends Thread {
 		return dimIsOk;
 	}
 
+	/**
+	 * asks the client to play again
+	 * @return boolean
+	 * @throws IOException
+	 */
 	private boolean playAgain() throws IOException {
 		boolean inputError = false;
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
@@ -279,6 +339,11 @@ public class ClientHandler extends Thread {
 		return false;
 	}
 
+	/**
+	 * general message writer from server to client
+	 * @param message
+	 * @throws IOException
+	 */
 	public synchronized void writeToClient(String message) throws IOException {
 		outputToClient.write("CHAT from server: " + message);
 		outputToClient.newLine();
@@ -286,14 +351,10 @@ public class ClientHandler extends Thread {
 
 	}
 
-	public boolean isTurn() {
-		return turn;
-	}
-
-	public void setTurn(boolean turn) {
-		this.turn = turn;
-	}
-
+	/**
+	 * enum for ClientStatus
+	 * @author martijn.slot
+	 */
 	public enum ClientStatus {
 
 		PREGAME, WAITING, INGAME;

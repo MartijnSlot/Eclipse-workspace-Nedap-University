@@ -11,6 +11,13 @@ import server.ClientHandler.ClientStatus;
 
 import java.io.*;
 
+/**
+ * Class for creating a general server.
+ * 
+ * @author Martijn Slot
+ * @version 1.0
+ */
+
 public class GoServer extends Thread {
 
 	public Socket socket;
@@ -49,6 +56,19 @@ public class GoServer extends Thread {
 			}
 		}
 	}
+	/**
+	 * getter for the clientHandlerMap
+	 * @return Map<ClientHandler, Integer>
+	 */
+	public Map<ClientHandler, Integer> getClientHandlerMap() {
+		return clientHandlerMap;
+	}
+
+	/**
+	 * Sends out a chatmessage to all players on server
+	 * @param message
+	 * @throws IOException
+	 */
 	
 	public synchronized void chatToAllPlayers(String message) throws IOException {
 		for (ClientHandler a : clientHandlerMap.keySet()) {
@@ -56,12 +76,19 @@ public class GoServer extends Thread {
 		}
 	}
 	
+	/**
+	 * enter the client into the server list, then into the server waiting list
+	 * if there is another client with the same dimension, it will start a game
+	 * @param client
+	 * @param dim
+	 * @throws IOException
+	 */
 	public void clientEntry(ClientHandler client, int dim) throws IOException {			
 		ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
 		clientHandlers.add(client);
 		clientHandlerMap.put(client, dim);	
 
-		if(client.getClientStatus() == ClientStatus.PREGAME) {
+		while (client.getClientStatus() == ClientStatus.PREGAME) {
 			if (pendingClients.containsKey(dim)) {
 				pendingClients.get(dim).addAll(clientHandlers);
 			} else {
@@ -69,27 +96,31 @@ public class GoServer extends Thread {
 			}
 
 			client.setClientStatus(ClientStatus.WAITING);
-		}
 
-		for (int dimBoard : pendingClients.keySet()) {
-			if (pendingClients.get(dimBoard).size() == 2) {
-				Random r = new Random();
-				int  n = r.nextInt(1);
-				ClientHandler ch1 = pendingClients.get(dimBoard).get(n);
-				ClientHandler ch2 = pendingClients.get(dimBoard).get(1-n);
-				pendingClients.remove(dimBoard);
-				new SingleGameServer(ch1, ch2, dim);
+			while (client.getClientStatus() == ClientStatus.WAITING) {
+				for (int dimBoard : pendingClients.keySet()) {
+					if (pendingClients.get(dimBoard).size() == 2) {
+						Random r = new Random();
+						int  n = r.nextInt(1);
+						ClientHandler ch1 = pendingClients.get(dimBoard).get(n);
+						ClientHandler ch2 = pendingClients.get(dimBoard).get(1-n);
+						pendingClients.remove(dimBoard);
+						new SingleGameServer(ch1, ch2, dim);
+						ch1.setClientStatus(ClientStatus.INGAME);
+						ch2.setClientStatus(ClientStatus.INGAME);
+					} break;
+				} break;
 			}
 		}
 	}
-
-	public Map<ClientHandler, Integer> getClientHandlerMap() {
-		return clientHandlerMap;
-	}
-
-	public void removeClient(ClientHandler a) {
+	
+	/**
+	 * removes a client from the server clientlist
+	 * @param ch
+	 */
+	public void removeClient(ClientHandler ch) {
 		try {
-			clientHandlerMap.remove(a);
+			clientHandlerMap.remove(ch);
 			socket.close();
 		} catch (IOException e) {
 			e.printStackTrace();

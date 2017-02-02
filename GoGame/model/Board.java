@@ -118,36 +118,6 @@ public class Board {
 		return freePositions;
 	} 
 
-	//	/**
-	//	 * checks if position has Liberties
-	//	 * @param position
-	//	 * @return boolean
-	//	 */
-	//	public boolean hasLiberties(Set<Position> nodes) {
-	//		return freePositions(nodes).size() == 0;
-	//	}
-
-	//	/**
-	//	 * Returns all attacking stone positions surrounding argument position. //TODO finish if necessary
-	//	 * @param position
-	//	 * @return set
-	//	 */
-	//	public Set<Position> attackPositions(Position pos) {
-	//		Stone attack = getPoint(pos).getStone().other();
-	//		Set<Position> attackPositions = new HashSet<>();
-	//
-	//		return attackPositions;
-	//	}
-
-	//	/**
-	//	 * checks if position has attacking stones
-	//	 * @param position
-	//	 * @return boolean
-	//	 */
-	//	public boolean hasAttackers(Position pos) {
-	//		return !attackPositions(pos).isEmpty();
-	//	}
-
 	/**
 	 * Returns a cluster of defending stone positions in which position pos is situated.
 	 * @param position
@@ -173,14 +143,6 @@ public class Board {
 		return defendingCluster;
 	}
 
-	//	/**
-	//	 * checks if position has defending stones
-	//	 * @param position
-	//	 * @return boolean
-	//	 */
-	//	public boolean hasDefenders(Position pos) {
-	//		return defendingCluster(pos).size() >= 1;
-	//	}
 
 	/**
 	 * Returns all liberty positions surrounding argument position (even if arguments exists in cluster of samecolor stones).
@@ -226,6 +188,7 @@ public class Board {
 	 * counts the endscore on the board. 
 	 * int[0] = score Stone.BLACK 
 	 * int[1] = score Stone.WHITE
+	 * territory count has been removed because it caused errors.
 	 * @return int[]
 	 */
 	public int[] countScore() {
@@ -236,8 +199,8 @@ public class Board {
 			if (points.get(p).getStone() == Stone.BLACK) blackScore += 1;
 			else if (points.get(p).getStone() == Stone.WHITE) whiteScore += 1;
 			else {
-				Set<Position> a = freePositions(defendingCluster(p)); 
-				//TODO
+//				Set<Position> a = freePositions(defendingCluster(p)); 
+				//TODO territory count
 			}
 		}
 
@@ -263,7 +226,7 @@ public class Board {
 	
 	/**
 	 * Prints a GTUI
-	 * @return String GTUI
+	 * @return String
 	 */
 	public String toString() {
 		String s = "  ";

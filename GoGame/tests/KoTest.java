@@ -11,6 +11,11 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Set;
 
+/**
+ * TESTS, obsolete and does not work because the entire game is not working
+ * @author martijn.slot
+ *
+ */
 public class KoTest {
 
 	private Game game;		

@@ -2,6 +2,12 @@ package model;
 
 import java.util.Objects;
 
+/**
+ * Class for creating a position on a GO board. 
+ * 
+ * @author Martijn Slot
+ * @version 1.0
+ */
 public class Position {
 
 	int x;
@@ -12,9 +18,18 @@ public class Position {
 		this.y = y;
 	}
 
+	/**
+	 * getter for the columns (x)
+	 * @return int
+	 */
 	public int getX() {
 		return x;
 	}
+	
+	/**
+	 * getter for the rows (y)
+	 * @return
+	 */
 	public int getY() {
 		return y;
 	}

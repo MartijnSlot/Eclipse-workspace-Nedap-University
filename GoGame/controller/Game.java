@@ -36,10 +36,8 @@ public class Game {
 		gogui.setBoardSize(dim);
 	}
 
-	// -- QUERIES
-
 	/**
-	 * Returns the board.
+	 * Getter that returns the board.
 	 * 
 	 * @return board
 	 */
@@ -48,7 +46,7 @@ public class Game {
 	}
 
 	/**
-	 * Returns the index of the player whose turn it is.
+	 * getter that returns the index of the player whose turn it is.
 	 * 
 	 * @return int
 	 */
@@ -56,12 +54,13 @@ public class Game {
 		return currentPlayer;
 	}
 
-
-	// -- METHODS
-
 	/**
-	 * As long as there is no winner, players keep playing turns
-	 * @param a
+	 * the 'move' turn of a player on the board. It puts a move for the current player on thge board
+	 * updates board TUI and GUI
+	 * writes history for the KO rule
+	 * gives the turn to the next player
+	 * @param row
+	 * @param col
 	 */
 	public void executeTurn(int row, int col) {
 		updateTUI();
@@ -74,8 +73,8 @@ public class Game {
 	}
 
 	/**
-	 * Pass mechanism
-	 * As long as there is no winner, a players switches turns with a pass
+	 * the 'pass' turn of a player on the board.
+	 * if both players have passed; determine winner
 	 */
 	public void passMove() {
 		if (!players[(currentPlayer + 1) % numberPlayers].pass) {
@@ -88,6 +87,9 @@ public class Game {
 
 	}
 
+	/**
+	 * determines the winner according to the score. Now only count stones
+	 */
 	private void determineWinner() {
 		if (board.countScore()[0] > board.countScore()[1]) {
 			for (int i = 1; i <= currentPlayer; i++) {
@@ -106,7 +108,7 @@ public class Game {
 
 	/**
 	 * tableflip mechanism
-	 * determine winner
+	 * sets a player to winner
 	 */
 	public void tableflipMove() {
 		players[currentPlayer].winner =  false;
@@ -122,8 +124,8 @@ public class Game {
 
 	/**
 	 * replace the defending cluster stones (black, white) with EMPTY
-	 * 
-	 * @param pos
+	 * @param row
+	 * @param col
 	 */
 	public void autoRemove(int row, int col) {
 		Set<Position> a = new HashSet<>();
@@ -150,8 +152,7 @@ public class Game {
 
 
 	/**
-	 * Deep copy of this board + write to history.
-	 * @return board
+	 * writes the current boardStatus to history.
 	 */
 	public void writeHistory() {
 		history.add(this.board.toSimpleString());
@@ -159,7 +160,8 @@ public class Game {
 
 	/**
 	 * checks if the placement of a stone is in accordance with the <i>ko-rule</i>
-	 * @param pos
+	 * @param row
+	 * @param col
 	 * @return boolean
 	 */
 	public boolean inKo(int row, int  col) {
@@ -175,17 +177,20 @@ public class Game {
 		return inKo;
 	}
 
+	/**
+	 * checks if the game has a winner
+	 * @return boolean
+	 */
 	public boolean hasWinner() {
 		return (players[0].winner | players[1].winner);
 	}
 
-	public Player directWinner() {
-		players[currentPlayer].winner = true;
-		return players[currentPlayer];
 
-	}
-
-
+	/**
+	 * adds a stone to the GUI, only the game is allowed to do this.
+	 * @param row
+	 * @param col
+	 */
 	public void addToGUI(int row, int col) {
 		boolean white = false;
 		if (this.players[currentPlayer].getStone() == Stone.WHITE) {
@@ -196,6 +201,11 @@ public class Game {
 		gogui.addStone(row - 1, col - 1, white);
 	}
 
+	/**
+	 * removes a stone from the GUI, only the game is allowed to do this.
+	 * @param row
+	 * @param col
+	 */
 	public void removeFromGUI(int row, int col) {
 		gogui.removeStone(row - 1, col - 1);
 	}
